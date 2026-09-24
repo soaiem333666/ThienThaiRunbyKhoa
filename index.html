@@ -2,458 +2,1005 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thiên Thai Run - Endless Runner</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #111;
-            user-select: none;
-        }
-        #canvas-container {
-            width: 100vw;
-            height: 100vh;
-        }
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .hud {
-            color: #fff;
-            font-size: 20px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            background: rgba(0, 70, 30, 0.7);
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: 2px solid #4CAF50;
-            height: fit-content;
-        }
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            pointer-events: auto;
-            text-align: center;
-        }
-        .btn {
-            background: linear-gradient(135deg, #2e7d32, #4caf50);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 22px;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-top: 20px;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
-            transition: transform 0.2s;
-        }
-        .btn:hover {
-            transform: scale(1.05);
-        }
-        .hidden { display: none !important; }
-    </style>
-    <!-- Nhúng thư viện Three.js -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THIÊN THAI RUN - Cung Đường Xanh Hành Trình Bình Yên</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js 3D Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,800;1,900&display=swap');
+        
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #051409;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Panel */
+        .glass-card {
+            background: rgba(10, 35, 18, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(74, 222, 128, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(74, 222, 128, 0.15);
+        }
+
+        /* Leaf-Shaped Logo Frame */
+        .leaf-logo-frame {
+            background: linear-gradient(135deg, #15803d 0%, #052e16 100%);
+            border: 3px solid #facc15;
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.5), inset 0 0 10px rgba(250, 204, 21, 0.3);
+        }
+
+        /* Metallic Text Gradient */
+        .gold-gradient-text {
+            background: linear-gradient(180deg, #fffbeb 0%, #fde047 40%, #eab308 70%, #854d0e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.9));
+        }
+
+        /* Glowing Medal Pulse */
+        .medal-glow-effect {
+            animation: glowPulse 2.5s infinite alternate ease-in-out;
+        }
+
+        @keyframes glowPulse {
+            0% {
+                transform: scale(1) rotate(0deg);
+                filter: drop-shadow(0 0 20px rgba(250, 204, 21, 0.8)) drop-shadow(0 0 40px rgba(34, 197, 94, 0.4));
+            }
+            100% {
+                transform: scale(1.06) rotate(2deg);
+                filter: drop-shadow(0 0 35px rgba(250, 204, 21, 1)) drop-shadow(0 0 60px rgba(34, 197, 94, 0.7));
+            }
+        }
+
+        /* Touch Control Buttons */
+        .touch-btn {
+            background: rgba(15, 45, 25, 0.65);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(134, 239, 172, 0.4);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        .touch-btn:active {
+            background: rgba(34, 197, 94, 0.8);
+            transform: scale(0.92);
+        }
+
+        /* God Ray Overlay Effect */
+        .god-rays {
+            background: radial-gradient(circle at 50% 0%, rgba(253, 224, 71, 0.15) 0%, rgba(34, 197, 94, 0.05) 50%, transparent 80%);
+            pointer-events: none;
+        }
+    </style>
 </head>
-<body>
+<body class="h-screen w-screen relative flex flex-col justify-between items-center select-none overflow-hidden">
 
-    <div id="canvas-container"></div>
+    <!-- God Rays Visual Filter -->
+    <div class="god-rays absolute inset-0 z-10"></div>
 
-    <div id="ui-layer">
-        <div class="hud">
-            🏃 Quãng đường: <span id="dist-text">0.00</span> KM
+    <!-- 3D WebGL Canvas Container -->
+    <div id="canvas-container" class="absolute inset-0 z-0"></div>
+
+    <!-- Top HUD Header -->
+    <div class="relative z-20 w-full max-w-2xl px-4 pt-3 flex flex-col items-center pointer-events-none">
+        <!-- Logo Emblem -->
+        <div class="relative leaf-logo-frame px-6 py-2 rounded-3xl flex flex-col items-center mb-2">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-leaf text-yellow-400 text-xl animate-pulse"></i>
+                <h1 class="text-2xl md:text-3xl font-black italic tracking-wider gold-gradient-text">
+                    THIÊN THAI <span class="text-white">RUN</span>
+                </h1>
+                <i class="fa-solid fa-person-running text-green-300 text-xl"></i>
+            </div>
+            <span class="text-[10px] md:text-xs font-black tracking-widest text-emerald-200 uppercase bg-black/40 px-3 py-0.5 rounded-full border border-emerald-400/30">
+                🌲 CUNG ĐƯỜNG XANH • RỪNG THÔNG AN CỰU 🌲
+            </span>
         </div>
-        <div class="hud">
-            🍃 Điểm Xanh: <span id="score-text">0</span>
+
+        <!-- HUD Statistics Bar -->
+        <div class="w-full flex items-center justify-between text-sm md:text-base font-bold bg-black/60 p-2.5 rounded-2xl border border-emerald-500/40 backdrop-blur-md shadow-2xl">
+            <!-- Distance Tracker -->
+            <div class="flex items-center space-x-2 text-emerald-400">
+                <i class="fa-solid fa-route text-xl text-emerald-300"></i>
+                <div>
+                    <div class="text-[9px] text-emerald-300/80 uppercase tracking-widest font-extrabold">Quãng đường</div>
+                    <span id="dist-val" class="text-xl font-black text-white">0</span> <span class="text-xs text-emerald-300">m</span>
+                </div>
+            </div>
+
+            <!-- Medal Progress Bar -->
+            <div class="flex-1 mx-4 max-w-[150px] md:max-w-[220px]">
+                <div class="flex justify-between text-[10px] text-yellow-300 mb-1 font-black tracking-wide">
+                    <span>ĐÍCH HUY CHƯƠNG</span>
+                    <span id="progress-text">0%</span>
+                </div>
+                <div class="w-full h-3.5 bg-gray-950 rounded-full border border-yellow-500/60 overflow-hidden p-0.5 shadow-inner">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-emerald-500 via-green-400 to-yellow-400 rounded-full transition-all duration-300 shadow-lg" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Coins Collected -->
+            <div class="flex items-center space-x-2 text-yellow-400">
+                <i class="fa-solid fa-coins text-xl animate-bounce"></i>
+                <div>
+                    <div class="text-[9px] text-yellow-300/80 uppercase tracking-widest font-extrabold">Lá Vàng</div>
+                    <span id="coin-val" class="text-xl font-black text-yellow-300">0</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Màn hình Bắt đầu -->
-    <div id="start-screen" class="overlay">
-        <h1 style="color: #4CAF50; font-size: 42px; margin-bottom: 10px;">THIÊN THAI RUN 🏃‍♂️</h1>
-        <p style="font-size: 18px; max-width: 500px; line-height: 1.5;">
-            Trải nghiệm chạy vô tận xuyên rừng thông An Cựu[cite: 2]! Né chướng ngại vật và ghi điểm cao nhất.
-        </p>
-        <p style="font-size: 15px; color: #aaa;">
-            🎮 <b>Phím Mũi tên Trái / Phải</b> để chuyển làn.<br>
-            🎮 <b>Mũi tên Lên / Phím Space</b> để Nhảy.
-        </p>
-        <button class="btn" onclick="startGame()">BẮT ĐẦU CHẠY</button>
+    <!-- Mobile Touch Controls -->
+    <div id="mobile-controls" class="relative z-20 w-full max-w-lg px-6 pb-6 pt-2 flex justify-between items-center pointer-events-auto md:hidden">
+        <!-- Directional Movements -->
+        <div class="flex space-x-3">
+            <button id="btn-left" class="touch-btn w-14 h-14 rounded-2xl flex items-center justify-center text-2xl text-emerald-300">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button id="btn-right" class="touch-btn w-14 h-14 rounded-2xl flex items-center justify-center text-2xl text-emerald-300">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- Jump & Slide Controls -->
+        <div class="flex space-x-3">
+            <button id="btn-slide" class="touch-btn w-14 h-14 rounded-2xl flex items-center justify-center text-2xl text-yellow-400">
+                <i class="fa-solid fa-arrow-down"></i>
+            </button>
+            <button id="btn-jump" class="touch-btn w-14 h-14 rounded-2xl flex items-center justify-center text-2xl text-green-400">
+                <i class="fa-solid fa-arrow-up"></i>
+            </button>
+        </div>
     </div>
 
-    <!-- Màn hình Game Over -->
-    <div id="gameover-screen" class="overlay hidden">
-        <h1 style="color: #f44336; font-size: 40px;">KẾT THÚC HÀNH TRÌNH! 💥</h1>
-        <p style="font-size: 22px;">Quãng đường đã chạy: <b style="color:#4CAF50"><span id="final-dist">0</span> KM</b></p>
-        <p style="font-size: 20px;">Điểm thu thập: <b style="color:#FFD700"><span id="final-score">0</span></b></p>
-        <button class="btn" onclick="resetGame()">CHẠY LẠI</button>
+    <!-- START GAME OVERLAY -->
+    <div id="screen-start" class="absolute inset-0 z-30 flex flex-col items-center justify-center px-4 bg-black/80 backdrop-blur-lg">
+        <div class="glass-card p-6 md:p-8 rounded-3xl max-w-md w-full text-center border-2 border-emerald-400/50 shadow-2xl relative overflow-hidden">
+            <i class="fa-solid fa-tree absolute -top-12 -right-12 text-9xl text-emerald-900/30 pointer-events-none"></i>
+
+            <div class="inline-block p-4 rounded-full bg-emerald-900/60 border-2 border-yellow-400 mb-3 shadow-xl">
+                <i class="fa-solid fa-person-running text-5xl text-yellow-400 animate-pulse"></i>
+            </div>
+
+            <h2 class="text-3xl md:text-4xl font-black gold-gradient-text tracking-wide mb-1">
+                THIÊN THAI RUN
+            </h2>
+            <p class="text-emerald-300 text-xs font-bold mb-4 uppercase tracking-widest">Hành Trình Bình Yên • Huế 2026</p>
+            
+            <p class="text-gray-200 text-sm mb-6 leading-relaxed font-medium">
+                Sẵn sàng vượt qua rừng thông An Cựu huyền bí! Tránh né cây đổ, vượt suối sâu, chạy thoát hổ vàng và thu thập <span class="text-yellow-400 font-bold">Lá Vàng Thiên Thai</span> để giành lấy <span class="text-yellow-300 font-bold">Huy Chương Danh Dự</span>.
+            </p>
+
+            <div class="bg-black/50 p-3.5 rounded-2xl text-xs text-emerald-200 mb-6 text-left border border-emerald-500/30 space-y-2">
+                <div class="flex items-center space-x-2"><i class="fa-solid fa-keyboard text-yellow-400 text-sm"></i><span><b>Mũi tên / WASD:</b> Trái, Phải, Nhảy, Cúi</span></div>
+                <div class="flex items-center space-x-2"><i class="fa-solid fa-hand-pointer text-yellow-400 text-sm"></i><span><b>Cảm ứng / Vuốt:</b> Nút trên màn hình hoặc vuốt tay</span></div>
+                <div class="flex items-center space-x-2"><i class="fa-solid fa-shield-halved text-emerald-400 text-sm"></i><span><b>Khiên Xanh:</b> Giúp bảo vệ khỏi 1 lần va chạm</span></div>
+                <div class="flex items-center space-x-2"><i class="fa-solid fa-trophy text-yellow-400 text-sm"></i><span><b>Đích:</b> Cán mốc 1,000m để nhận Huy Chương!</span></div>
+            </div>
+
+            <button id="btn-start" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-green-500 to-yellow-500 hover:from-emerald-500 hover:to-yellow-400 text-gray-950 font-black text-lg uppercase tracking-wider shadow-2xl active:scale-95 transition-all border border-yellow-200">
+                <i class="fa-solid fa-play mr-2"></i> Bắt Đầu Chạy
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME OVER OVERLAY -->
+    <div id="screen-gameover" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center px-4 bg-black/85 backdrop-blur-lg">
+        <div class="glass-card p-6 md:p-8 rounded-3xl max-w-md w-full text-center border-2 border-red-500/50 shadow-2xl">
+            <div class="inline-block p-4 rounded-full bg-red-950/60 border-2 border-red-500 mb-3 text-red-400 text-4xl shadow-xl">
+                <i class="fa-solid fa-heart-crack"></i>
+            </div>
+            <h2 class="text-3xl font-black text-red-400 mb-1">VẠN SỰ KHỞI ĐẦU NAN!</h2>
+            <p class="text-gray-300 text-xs mb-5">Bạn đã vấp ngã trên cung đường rừng thông.</p>
+
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-black/60 p-3.5 rounded-2xl border border-gray-700 shadow-inner">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold block">Quãng đường</span>
+                    <span id="go-dist" class="text-2xl font-black text-emerald-400">0m</span>
+                </div>
+                <div class="bg-black/60 p-3.5 rounded-2xl border border-gray-700 shadow-inner">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold block">Lá Vàng Thu Nhặt</span>
+                    <span id="go-coins" class="text-2xl font-black text-yellow-400">0</span>
+                </div>
+            </div>
+
+            <button id="btn-restart" class="w-full py-4 rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-gray-950 font-black text-base uppercase tracking-wider shadow-xl active:scale-95 transition-all border border-yellow-200">
+                <i class="fa-solid fa-rotate-right mr-2"></i> Thử Lại Ngay
+            </button>
+        </div>
+    </div>
+
+    <!-- VICTORY / MEDAL CEREMONY OVERLAY -->
+    <div id="screen-victory" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center px-4 bg-black/90 backdrop-blur-xl">
+        <div class="glass-card p-6 md:p-8 rounded-3xl max-w-md w-full text-center border-2 border-yellow-400 shadow-2xl relative overflow-hidden">
+            <h2 class="text-2xl md:text-3xl font-black gold-gradient-text tracking-wide uppercase mb-1">
+                VỀ ĐÍCH XUẤT SẮC!
+            </h2>
+            <p class="text-emerald-300 text-xs font-bold mb-4 tracking-wider">BẠN ĐÃ NHẬN HUY CHƯƠNG THIÊN THAI RUN 2026</p>
+
+            <!-- Medal Graphic Rendering -->
+            <div class="relative my-5 flex justify-center items-center">
+                <div class="w-44 h-44 md:w-52 md:h-52 rounded-full medal-glow-effect bg-gradient-to-tr from-amber-600 via-yellow-300 to-amber-100 p-2.5 flex items-center justify-center shadow-2xl border-4 border-yellow-200">
+                    <div class="w-full h-full rounded-full bg-gradient-to-b from-emerald-900 to-green-950 border-4 border-yellow-400 flex flex-col items-center justify-center p-3 text-center shadow-inner">
+                        <i class="fa-solid fa-leaf text-yellow-400 text-4xl mb-1 animate-bounce"></i>
+                        <span class="text-yellow-300 font-black text-sm md:text-base tracking-wider uppercase drop-shadow-md">THIÊN THAI RUN</span>
+                        <span class="text-[9px] text-emerald-200 font-bold uppercase tracking-widest mt-1">HUY CHƯƠNG VÀNG</span>
+                        <div class="mt-2 text-[10px] text-yellow-300 font-extrabold border-t border-yellow-500/50 pt-1 w-3/4">
+                            1,000M VICTORY
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="bg-emerald-950/80 p-3 rounded-xl border border-yellow-500/40 mb-6 text-xs text-emerald-200 leading-relaxed font-medium">
+                Chúc mừng bạn đã chinh phục Cung Đường Xanh và chung tay bảo vệ rừng thông An Cựu bình yên!
+            </p>
+
+            <div class="flex space-x-3">
+                <button id="btn-victory-restart" class="flex-1 py-3.5 rounded-2xl bg-gray-800 hover:bg-gray-700 text-white font-bold text-sm border border-gray-600">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Chạy Lại
+                </button>
+                <button id="btn-continue" class="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-yellow-500 text-gray-950 font-black text-sm uppercase shadow-xl border border-yellow-200">
+                    <i class="fa-solid fa-forward mr-1"></i> Chạy Tiếp
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
-        const GAME_SPEED = 0.4;
-        const LANES = [-2.5, 0, 2.5];
+        /* Audio Synthesizer using Web Audio API */
+        class SoundFX {
+            constructor() { this.ctx = null; }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playCoin() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1760, this.ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.1);
+            }
+            playPowerup() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(900, this.ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+            playJump() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(550, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+            playHit() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+            playVictory() {
+                if (!this.ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.3, this.ctx.currentTime + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.1 + 0.35);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.1);
+                    osc.stop(this.ctx.currentTime + idx * 0.1 + 0.35);
+                });
+            }
+        }
+        const sfx = new SoundFX();
+    </script>
+
+    <script>
+        // Game Constants
+        const LANES = [-2.2, 0, 2.2];
+        const TARGET_MEDAL_DISTANCE = 1000;
 
         let scene, camera, renderer;
-        let playerGroup, leftArm, rightArm, leftLeg, rightLeg;
+        let playerGroup, playerShirtMat, shieldMesh;
+        let obstacles = [], coins = [], powerups = [], sceneryObjects = [], particles = [];
+        let finishGateGroup = null;
+
+        // Player State Variables
         let currentLane = 1;
+        let targetX = 0;
+        let playerY = 0;
+        let velocityY = 0;
         let isJumping = false;
-        let jumpVelocity = 0;
-        const gravity = 0.015;
+        let isSliding = false;
+        let slideTimer = 0;
+        let hasShield = false;
 
-        let distanceCovered = 0;
-        let score = 0;
-        let isGameRunning = false;
-        let animTime = 0;
+        // Game Loop Variables
+        let isPlaying = false;
+        let isVictoryReached = false;
+        let distance = 0;
+        let coinsCollected = 0;
+        let speed = 0.52;
+        let clock = new THREE.Clock();
+        let spawnTimer = 0;
 
-        let obstacles = [];
-        let collectibles = [];
-        let roadTiles = [];
-
-        function init3D() {
+        function initEngine() {
             const container = document.getElementById('canvas-container');
-            
-            // Khởi tạo Scene
+
+            // 3D Scene Setup
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87CEEB);
-            scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
+            scene.background = new THREE.Color(0x0a2312); // Lush Forest Night/Dawn Atmosphere
+            scene.fog = new THREE.FogExp2(0x0a2312, 0.015);
 
-            // Khởi tạo Camera
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 3.5, -6);
-            camera.lookAt(0, 1.5, 5);
+            // Perspective Camera Setup
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+            camera.position.set(0, 3.8, 7.5);
+            camera.lookAt(0, 1.2, -5);
 
-            // Khởi tạo Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            // WebGL Renderer Setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.1;
             container.appendChild(renderer.domElement);
 
-            // Ánh sáng
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            // Lighting System
+            const ambientLight = new THREE.AmbientLight(0xdcfce7, 0.8);
             scene.add(ambientLight);
 
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(20, 40, -20);
-            dirLight.castShadow = true;
-            scene.add(dirLight);
+            // Warm Sunlight Shafts
+            const sunLight = new THREE.DirectionalLight(0xfef08a, 1.3);
+            sunLight.position.set(15, 25, 10);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 1024;
+            sunLight.shadow.mapSize.height = 1024;
+            scene.add(sunLight);
 
-            // Tạo nhân vật & môi trường
-            createAnimatedPlayer();
-            createRoad();
+            // Subdued Emerald Point Light for Forest Glow
+            const forestGlow = new THREE.PointLight(0x4ade80, 0.8, 50);
+            forestGlow.position.set(0, 5, -20);
+            scene.add(forestGlow);
+
+            // Build World Models
+            createGroundAndTrack();
+            createPlayer();
+            buildForestScenery();
+            createEnvironmentParticles();
 
             window.addEventListener('resize', onWindowResize);
-            setupControls();
         }
 
-        // Tạo nhân vật có khả năng cử động chân tay
-        function createAnimatedPlayer() {
+        function createGroundAndTrack() {
+            // Main Running Track
+            const trackGeo = new THREE.PlaneGeometry(7.8, 300);
+            const trackMat = new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.95 });
+            const track = new THREE.Mesh(trackGeo, trackMat);
+            track.rotation.x = -Math.PI / 2;
+            track.position.z = -100;
+            track.receiveShadow = true;
+            scene.add(track);
+
+            // Green Border Edges
+            const borderGeo = new THREE.BoxGeometry(0.4, 0.2, 300);
+            const borderMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 });
+            const b1 = new THREE.Mesh(borderGeo, borderMat);
+            b1.position.set(-3.9, 0.1, -100);
+            const b2 = b1.clone();
+            b2.position.set(3.9, 0.1, -100);
+            scene.add(b1, b2);
+
+            // Surrounding Grass Ground
+            const grassGeo = new THREE.PlaneGeometry(120, 300);
+            const grassMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 1.0 });
+            const grass = new THREE.Mesh(grassGeo, grassMat);
+            grass.rotation.x = -Math.PI / 2;
+            grass.position.y = -0.05;
+            grass.position.z = -100;
+            grass.receiveShadow = true;
+            scene.add(grass);
+        }
+
+        function createPlayer() {
             playerGroup = new THREE.Group();
 
-            const skinMat = new THREE.MeshLambertMaterial({ color: 0xffdbac });
+            // Green Shirt (Thiên Thai Run Jersey)
+            const shirtGeo = new THREE.BoxGeometry(0.72, 0.82, 0.42);
+            playerShirtMat = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.3 });
+            const shirt = new THREE.Mesh(shirtGeo, playerShirtMat);
+            shirt.position.y = 1.05;
+            shirt.castShadow = true;
+            playerGroup.add(shirt);
 
-            // Thân áo Thiên Thai Run (Màu xanh lá)
-            const torsoGeo = new THREE.BoxGeometry(0.6, 0.8, 0.35);
-            const torsoMat = new THREE.MeshLambertMaterial({ color: 0x4caf50 });
-            const torso = new THREE.Mesh(torsoGeo, torsoMat);
-            torso.position.y = 1.1;
-            torso.castShadow = true;
-            playerGroup.add(torso);
-
-            // Đầu
-            const headGeo = new THREE.SphereGeometry(0.22, 16, 16);
-            const head = new THREE.Mesh(headGeo, skinMat);
-            head.position.y = 1.7;
-            playerGroup.add(head);
-
-            // Quần đùi
-            const shortsGeo = new THREE.BoxGeometry(0.62, 0.3, 0.37);
-            const shortsMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+            // Black Shorts
+            const shortsGeo = new THREE.BoxGeometry(0.7, 0.4, 0.44);
+            const shortsMat = new THREE.MeshStandardMaterial({ color: 0x09090b });
             const shorts = new THREE.Mesh(shortsGeo, shortsMat);
-            shorts.position.y = 0.65;
+            shorts.position.y = 0.58;
             playerGroup.add(shorts);
 
-            // Khớp Tay Trái
-            const armGeo = new THREE.BoxGeometry(0.15, 0.6, 0.15);
-            leftArm = new THREE.Mesh(armGeo, skinMat);
-            leftArm.position.set(-0.4, 1.1, 0);
-            leftArm.geometry.translate(0, -0.25, 0);
-            playerGroup.add(leftArm);
+            // Head & Skin
+            const headGeo = new THREE.SphereGeometry(0.26, 16, 16);
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xfdba74, roughness: 0.6 });
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.y = 1.62;
+            playerGroup.add(head);
 
-            // Khớp Tay Phải
-            rightArm = new THREE.Mesh(armGeo, skinMat);
-            rightArm.position.set(0.4, 1.1, 0);
-            rightArm.geometry.translate(0, -0.25, 0);
-            playerGroup.add(rightArm);
+            // Hair
+            const hairGeo = new THREE.BoxGeometry(0.54, 0.18, 0.54);
+            const hairMat = new THREE.MeshStandardMaterial({ color: 0x18181b });
+            const hair = new THREE.Mesh(hairGeo, hairMat);
+            hair.position.y = 1.8;
+            playerGroup.add(hair);
 
-            // Khớp Chân Trái
-            const legGeo = new THREE.BoxGeometry(0.18, 0.6, 0.18);
-            leftLeg = new THREE.Mesh(legGeo, skinMat);
-            leftLeg.position.set(-0.18, 0.5, 0);
-            leftLeg.geometry.translate(0, -0.25, 0);
-            playerGroup.add(leftLeg);
+            // Arms & Legs
+            const limbGeo = new THREE.BoxGeometry(0.22, 0.65, 0.22);
+            playerGroup.leftLeg = new THREE.Mesh(limbGeo, skinMat);
+            playerGroup.leftLeg.position.set(-0.22, 0.22, 0);
+            playerGroup.leftLeg.castShadow = true;
+            playerGroup.add(playerGroup.leftLeg);
 
-            // Khớp Chân Phải
-            rightLeg = new THREE.Mesh(legGeo, skinMat);
-            rightLeg.position.set(0.18, 0.5, 0);
-            rightLeg.geometry.translate(0, -0.25, 0);
-            playerGroup.add(rightLeg);
+            playerGroup.rightLeg = new THREE.Mesh(limbGeo, skinMat);
+            playerGroup.rightLeg.position.set(0.22, 0.22, 0);
+            playerGroup.rightLeg.castShadow = true;
+            playerGroup.add(playerGroup.rightLeg);
 
-            playerGroup.position.set(LANES[currentLane], 0, 0);
+            // Green Energy Shield Bubble Mesh
+            const shieldGeo = new THREE.SphereGeometry(1.3, 24, 24);
+            const shieldMat = new THREE.MeshStandardMaterial({ 
+                color: 0x4ade80, 
+                transparent: true, 
+                opacity: 0.35, 
+                roughness: 0.1, 
+                emissive: 0x22c55e, 
+                emissiveIntensity: 0.5 
+            });
+            shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+            shieldMesh.position.y = 1.0;
+            shieldMesh.visible = false;
+            playerGroup.add(shieldMesh);
+
+            playerGroup.position.set(0, 0, 0);
             scene.add(playerGroup);
         }
 
-        function createRoad() {
-            for (let i = 0; i < 12; i++) {
-                spawnRoadTile(i * 20);
+        function buildForestScenery() {
+            // Pine Trees along sides
+            for (let z = 20; z > -220; z -= 10) {
+                createPineTree(-6.5 - Math.random() * 5, z);
+                createPineTree(6.5 + Math.random() * 5, z);
             }
+
+            // Pagoda Temple Gate at target finish line
+            createPagodaGate(0, -180);
         }
 
-        function spawnRoadTile(zPos) {
-            const tileGroup = new THREE.Group();
+        function createPineTree(x, z) {
+            const treeGroup = new THREE.Group();
 
-            // Mặt đường
-            const roadGeo = new THREE.PlaneGeometry(9, 20);
-            const roadMat = new THREE.MeshLambertMaterial({ color: 0x4e4e4e });
-            const road = new THREE.Mesh(roadGeo, roadMat);
-            road.rotation.x = -Math.PI / 2;
-            road.receiveShadow = true;
-            tileGroup.add(road);
-
-            // Vạch kẻ đường
-            for (let l of [-1.25, 1.25]) {
-                const lineGeo = new THREE.PlaneGeometry(0.1, 20);
-                const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                const line = new THREE.Mesh(lineGeo, lineMat);
-                line.rotation.x = -Math.PI / 2;
-                line.position.x = l;
-                line.position.y = 0.01;
-                tileGroup.add(line);
-            }
-
-            // Đồi cỏ 2 bên
-            const grassGeo = new THREE.PlaneGeometry(20, 20);
-            const grassMat = new THREE.MeshLambertMaterial({ color: 0x2e7d32 });
-
-            const leftGrass = new THREE.Mesh(grassGeo, grassMat);
-            leftGrass.rotation.x = -Math.PI / 2;
-            leftGrass.position.x = -14.5;
-            tileGroup.add(leftGrass);
-
-            const rightGrass = new THREE.Mesh(grassGeo, grassMat);
-            rightGrass.rotation.x = -Math.PI / 2;
-            rightGrass.position.x = 14.5;
-            tileGroup.add(rightGrass);
-
-            // Cây thông Rừng An Cựu
-            for (let i = -8; i <= 8; i += 4) {
-                spawnTree(tileGroup, -7 - Math.random() * 3, i);
-                spawnTree(tileGroup, 7 + Math.random() * 3, i);
-            }
-
-            tileGroup.position.z = zPos;
-            scene.add(tileGroup);
-            roadTiles.push(tileGroup);
-        }
-
-        function spawnTree(parent, x, z) {
-            const tree = new THREE.Group();
-            const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.5);
-            const trunkMat = new THREE.MeshLambertMaterial({ color: 0x4a2c11 });
+            // Trunk
+            const trunkGeo = new THREE.CylinderGeometry(0.22, 0.4, 3.2, 8);
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3f2314, roughness: 0.9 });
             const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.y = 0.75;
-            tree.add(trunk);
+            trunk.position.y = 1.6;
+            trunk.castShadow = true;
+            treeGroup.add(trunk);
 
-            const leavesGeo = new THREE.ConeGeometry(1.3, 3.2, 6);
-            const leavesMat = new THREE.MeshLambertMaterial({ color: 0x1b4d3e });
-            const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-            leaves.position.y = 2.6;
-            tree.add(leaves);
+            // Foliage Cone Layers
+            const leafMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.7 });
+            for (let i = 0; i < 3; i++) {
+                const cone = new THREE.Mesh(new THREE.ConeGeometry(1.8 - i * 0.35, 2.2, 8), leafMat);
+                cone.position.y = 2.6 + i * 1.3;
+                cone.castShadow = true;
+                treeGroup.add(cone);
+            }
 
-            tree.position.set(x, 0, z);
-            parent.add(tree);
+            treeGroup.position.set(x, 0, z);
+            sceneryObjects.push(treeGroup);
+            scene.add(treeGroup);
         }
 
-        function spawnObstacle(zPos) {
-            const laneIndex = Math.floor(Math.random() * 3);
-            const x = LANES[laneIndex];
+        function createPagodaGate(x, z) {
+            finishGateGroup = new THREE.Group();
+            const stoneMat = new THREE.MeshStandardMaterial({ color: 0x71717a, roughness: 0.8 });
+            const redRoofMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.4 });
 
-            const geo = new THREE.BoxGeometry(1.8, 0.9, 0.6);
-            const mat = new THREE.MeshLambertMaterial({ color: 0xc62828 });
-            const obs = new THREE.Mesh(geo, mat);
-            obs.position.set(x, 0.45, zPos);
-            obs.castShadow = true;
+            // Pillars
+            const p1 = new THREE.Mesh(new THREE.BoxGeometry(0.9, 6, 0.9), stoneMat);
+            p1.position.set(-4, 3, 0);
+            const p2 = p1.clone();
+            p2.position.set(4, 3, 0);
+            finishGateGroup.add(p1, p2);
 
-            scene.add(obs);
-            obstacles.push(obs);
+            // Arch Signboard
+            const arch = new THREE.Mesh(new THREE.BoxGeometry(9.5, 1.2, 1), stoneMat);
+            arch.position.set(0, 5.8, 0);
+            finishGateGroup.add(arch);
+
+            // Curved Pagoda Roof
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(6.5, 2, 4), redRoofMat);
+            roof.rotation.y = Math.PI / 4;
+            roof.scale.set(1.4, 1, 0.8);
+            roof.position.set(0, 7.2, 0);
+            finishGateGroup.add(roof);
+
+            finishGateGroup.position.set(x, 0, z);
+            scene.add(finishGateGroup);
         }
 
-        function spawnCollectible(zPos) {
-            const laneIndex = Math.floor(Math.random() * 3);
-            const x = LANES[laneIndex];
+        function createEnvironmentParticles() {
+            const particleGeo = new THREE.BufferGeometry();
+            const count = 120;
+            const posArray = new Float32Array(count * 3);
 
-            const geo = new THREE.OctahedronGeometry(0.35);
-            const mat = new THREE.MeshBasicMaterial({ color: 0x76ff03 });
-            const item = new THREE.Mesh(geo, mat);
-            item.position.set(x, 1.1, zPos);
+            for (let i = 0; i < count * 3; i += 3) {
+                posArray[i] = (Math.random() - 0.5) * 30;
+                posArray[i + 1] = Math.random() * 8 + 0.5;
+                posArray[i + 2] = (Math.random() - 0.5) * 100;
+            }
 
-            scene.add(item);
-            collectibles.push(item);
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particleMat = new THREE.PointsMaterial({
+                size: 0.15,
+                color: 0xfde047,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const particleSystem = new THREE.Points(particleGeo, particleMat);
+            particles.push({ system: particleSystem, geo: particleGeo });
+            scene.add(particleSystem);
+        }
+
+        function spawnObstaclesAndCollectibles() {
+            spawnTimer++;
+            if (spawnTimer < 40) return;
+            spawnTimer = 0;
+
+            const spawnZ = -85;
+            const lane = Math.floor(Math.random() * 3);
+            const posX = LANES[lane];
+            const randVal = Math.random();
+
+            if (randVal < 0.35) {
+                // Fallen Tree Log
+                createLogObstacle(posX, spawnZ);
+            } else if (randVal < 0.65) {
+                // Tiger Beast
+                createTigerObstacle(posX, spawnZ);
+            } else {
+                // Water River Stream with Bridge
+                createRiverObstacle(spawnZ);
+            }
+
+            // Spawn Collectible Coins
+            for (let i = 0; i < 3; i++) {
+                const coinLane = Math.floor(Math.random() * 3);
+                createCoin(LANES[coinLane], spawnZ - (i * 4.5));
+            }
+
+            // Spawn Green Shield Powerup (Rare)
+            if (Math.random() < 0.18 && !hasShield) {
+                const shieldLane = Math.floor(Math.random() * 3);
+                createShieldPowerup(LANES[shieldLane], spawnZ - 10);
+            }
+        }
+
+        function createLogObstacle(x, z) {
+            const logGroup = new THREE.Group();
+            const logGeo = new THREE.CylinderGeometry(0.38, 0.38, 2.3, 12);
+            const logMat = new THREE.MeshStandardMaterial({ color: 0x4a2e19, roughness: 0.9 });
+            const log = new THREE.Mesh(logGeo, logMat);
+            log.rotation.z = Math.PI / 2;
+            log.position.y = 0.38;
+            log.castShadow = true;
+            logGroup.add(log);
+
+            // Moss details
+            const mossGeo = new THREE.BoxGeometry(1.2, 0.1, 0.4);
+            const mossMat = new THREE.MeshStandardMaterial({ color: 0x15803d });
+            const moss = new THREE.Mesh(mossGeo, mossMat);
+            moss.position.set(0, 0.75, 0);
+            logGroup.add(moss);
+
+            logGroup.position.set(x, 0, z);
+            logGroup.obstacleType = 'LOG';
+            obstacles.push(logGroup);
+            scene.add(logGroup);
+        }
+
+        function createTigerObstacle(x, z) {
+            const tigerGroup = new THREE.Group();
+            const orangeMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.5 });
+            const blackMat = new THREE.MeshStandardMaterial({ color: 0x18181b });
+
+            // Body
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.75, 1.5), orangeMat);
+            body.position.y = 0.55;
+            body.castShadow = true;
+            tigerGroup.add(body);
+
+            // Head
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.65, 0.65), orangeMat);
+            head.position.set(0, 0.95, -0.65);
+            tigerGroup.add(head);
+
+            // Stripes
+            const stripe1 = new THREE.Mesh(new THREE.BoxGeometry(0.88, 0.77, 0.15), blackMat);
+            stripe1.position.set(0, 0.56, -0.2);
+            tigerGroup.add(stripe1);
+
+            tigerGroup.position.set(x, 0, z);
+            tigerGroup.obstacleType = 'TIGER';
+            obstacles.push(tigerGroup);
+            scene.add(tigerGroup);
+        }
+
+        function createRiverObstacle(z) {
+            const riverGroup = new THREE.Group();
+
+            // Water stream
+            const waterMat = new THREE.MeshStandardMaterial({ 
+                color: 0x0288d1, 
+                roughness: 0.1, 
+                transparent: true, 
+                opacity: 0.85 
+            });
+            const water = new THREE.Mesh(new THREE.PlaneGeometry(7.8, 3.2), waterMat);
+            water.rotation.x = -Math.PI / 2;
+            water.position.set(0, 0.02, z);
+            riverGroup.add(water);
+
+            // Wooden Bridge over middle lane
+            const bridgeMat = new THREE.MeshStandardMaterial({ color: 0x78350f });
+            const bridge = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.12, 3.4), bridgeMat);
+            bridge.position.set(LANES[1], 0.08, z);
+            riverGroup.add(bridge);
+
+            riverGroup.position.set(0, 0, z);
+            riverGroup.obstacleType = 'RIVER';
+            obstacles.push(riverGroup);
+            scene.add(riverGroup);
+        }
+
+        function createCoin(x, z) {
+            const coinGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.08, 16);
+            const coinMat = new THREE.MeshStandardMaterial({ 
+                color: 0xfacc15, 
+                metalness: 0.9, 
+                roughness: 0.1,
+                emissive: 0xca8a04,
+                emissiveIntensity: 0.3
+            });
+            const coin = new THREE.Mesh(coinGeo, coinMat);
+            coin.rotation.x = Math.PI / 3;
+            coin.position.set(x, 0.85, z);
+            
+            coins.push(coin);
+            scene.add(coin);
+        }
+
+        function createShieldPowerup(x, z) {
+            const shieldPowerGeo = new THREE.OctahedronGeometry(0.45);
+            const shieldPowerMat = new THREE.MeshStandardMaterial({ 
+                color: 0x4ade80, 
+                emissive: 0x22c55e, 
+                emissiveIntensity: 0.8,
+                wireframe: true 
+            });
+            const powerup = new THREE.Mesh(shieldPowerGeo, shieldPowerMat);
+            powerup.position.set(x, 0.9, z);
+
+            powerups.push(powerup);
+            scene.add(powerup);
         }
 
         function setupControls() {
-            document.addEventListener('keydown', (e) => {
-                if (!isGameRunning) return;
+            window.addEventListener('keydown', (e) => {
+                if (!isPlaying) return;
 
-                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-                    if (currentLane > 0) currentLane--;
-                } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-                    if (currentLane < 2) currentLane++;
-                } else if ((e.key === 'ArrowUp' || e.key === ' ') && !isJumping) {
-                    isJumping = true;
-                    jumpVelocity = 0.28;
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveLane(-1);
+                else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveLane(1);
+                else if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && !isJumping) jump();
+                else if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && !isSliding) slide();
+            });
+
+            // Touch Buttons
+            document.getElementById('btn-left').onclick = () => isPlaying && moveLane(-1);
+            document.getElementById('btn-right').onclick = () => isPlaying && moveLane(1);
+            document.getElementById('btn-jump').onclick = () => isPlaying && !isJumping && jump();
+            document.getElementById('btn-slide').onclick = () => isPlaying && !isSliding && slide();
+
+            // Touch Swipe Gestures
+            let startX = 0, startY = 0;
+            window.addEventListener('touchstart', (e) => {
+                startX = e.changedTouches[0].screenX;
+                startY = e.changedTouches[0].screenY;
+            });
+
+            window.addEventListener('touchend', (e) => {
+                if (!isPlaying) return;
+                const diffX = e.changedTouches[0].screenX - startX;
+                const diffY = e.changedTouches[0].screenY - startY;
+
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (diffX > 30) moveLane(1);
+                    else if (diffX < -30) moveLane(-1);
+                } else {
+                    if (diffY < -30 && !isJumping) jump();
+                    else if (diffY > 30 && !isSliding) slide();
                 }
             });
         }
 
-        function startGame() {
-            document.getElementById('start-screen').classList.add('hidden');
-            isGameRunning = true;
+        function moveLane(dir) {
+            currentLane = Math.max(0, Math.min(2, currentLane + dir));
+            targetX = LANES[currentLane];
         }
 
-        function resetGame() {
-            obstacles.forEach(o => scene.remove(o));
-            collectibles.forEach(c => scene.remove(c));
-            obstacles = [];
-            collectibles = [];
-
-            distanceCovered = 0;
-            score = 0;
-            currentLane = 1;
-            playerGroup.position.set(LANES[1], 0, 0);
-
-            document.getElementById('score-text').innerText = '0';
-            document.getElementById('dist-text').innerText = '0.00';
-
-            document.getElementById('gameover-screen').classList.add('hidden');
-            isGameRunning = true;
+        function jump() {
+            isJumping = true;
+            velocityY = 0.24;
+            sfx.playJump();
         }
 
-        function gameOver() {
-            isGameRunning = false;
-            const distKM = (distanceCovered / 1000).toFixed(2);
-            document.getElementById('final-dist').innerText = distKM;
-            document.getElementById('final-score').innerText = score;
-            document.getElementById('gameover-screen').classList.remove('hidden');
-        }
-
-        function update() {
-            if (!isGameRunning) return;
-
-            // Tính toán quãng đường (KM)
-            distanceCovered += GAME_SPEED * 0.8;
-            const currentKM = (distanceCovered / 1000).toFixed(2);
-            document.getElementById('dist-text').innerText = currentKM;
-
-            // Chuyển làn mượt
-            playerGroup.position.x += (LANES[currentLane] - playerGroup.position.x) * 0.2;
-
-            // Cử động Tay - Chân khi chạy
-            animTime += 0.2;
-            if (!isJumping) {
-                leftArm.rotation.x = Math.sin(animTime) * 0.7;
-                rightArm.rotation.x = -Math.sin(animTime) * 0.7;
-                leftLeg.rotation.x = -Math.sin(animTime) * 0.8;
-                rightLeg.rotation.x = Math.sin(animTime) * 0.8;
-            } else {
-                leftArm.rotation.x = -1;
-                rightArm.rotation.x = -1;
-                leftLeg.rotation.x = 0.5;
-                rightLeg.rotation.x = -0.5;
-            }
-
-            // Xử lý Nhảy
-            if (isJumping) {
-                playerGroup.position.y += jumpVelocity;
-                jumpVelocity -= gravity;
-                if (playerGroup.position.y <= 0) {
-                    playerGroup.position.y = 0;
-                    isJumping = false;
-                }
-            }
-
-            // Di chuyển đường
-            roadTiles.forEach(tile => {
-                tile.position.z -= GAME_SPEED;
-                if (tile.position.z < -20) {
-                    tile.position.z += 240;
-                }
-            });
-
-            // Sinh chướng ngại vật & vật phẩm ngẫu nhiên
-            if (Math.random() < 0.03) spawnObstacle(playerGroup.position.z + 90);
-            if (Math.random() < 0.04) spawnCollectible(playerGroup.position.z + 90);
-
-            // Xử lý Chướng ngại vật
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                let obs = obstacles[i];
-                obs.position.z -= GAME_SPEED;
-
-                // Va chạm
-                if (Math.abs(obs.position.z - playerGroup.position.z) < 0.6 &&
-                    Math.abs(obs.position.x - playerGroup.position.x) < 0.8 &&
-                    playerGroup.position.y < 0.8) {
-                    gameOver();
-                }
-
-                if (obs.position.z < -10) {
-                    scene.remove(obs);
-                    obstacles.splice(i, 1);
-                }
-            }
-
-            // Xử lý Vật phẩm
-            for (let i = collectibles.length - 1; i >= 0; i--) {
-                let item = collectibles[i];
-                item.position.z -= GAME_SPEED;
-                item.rotation.y += 0.05;
-
-                if (Math.abs(item.position.z - playerGroup.position.z) < 0.7 &&
-                    Math.abs(item.position.x - playerGroup.position.x) < 0.7) {
-                    score += 10;
-                    document.getElementById('score-text').innerText = score;
-                    scene.remove(item);
-                    collectibles.splice(i, 1);
-                } else if (item.position.z < -10) {
-                    scene.remove(item);
-                    collectibles.splice(i, 1);
-                }
-            }
+        function slide() {
+            isSliding = true;
+            slideTimer = 30;
+            playerGroup.scale.set(1, 0.5, 1);
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            update();
+
+            if (isPlaying) {
+                // Distance Increment
+                distance += speed * 1.6;
+                document.getElementById('dist-val').innerText = Math.floor(distance);
+
+                // Progress Percentage
+                const pct = Math.min(100, Math.floor((distance / TARGET_MEDAL_DISTANCE) * 100));
+                document.getElementById('progress-bar').style.width = `${pct}%`;
+                document.getElementById('progress-text').innerText = `${pct}%`;
+
+                // Victory Check
+                if (distance >= TARGET_MEDAL_DISTANCE && !isVictoryReached) {
+                    triggerVictory();
+                }
+
+                // Smooth Lane Lerp
+                playerGroup.position.x += (targetX - playerGroup.position.x) * 0.22;
+
+                // Jump / Slide Physics
+                if (isJumping) {
+                    playerY += velocityY;
+                    velocityY -= 0.013;
+                    if (playerY <= 0) {
+                        playerY = 0;
+                        isJumping = false;
+                    }
+                }
+                playerGroup.position.y = playerY;
+
+                if (isSliding) {
+                    slideTimer--;
+                    if (slideTimer <= 0) {
+                        isSliding = false;
+                        playerGroup.scale.set(1, 1, 1);
+                    }
+                }
+
+                // Runner Leg Swing Animation
+                const runCycle = Math.sin(Date.now() * 0.018) * 0.55;
+                if (playerGroup.leftLeg && playerGroup.rightLeg && !isJumping) {
+                    playerGroup.leftLeg.rotation.x = runCycle;
+                    playerGroup.rightLeg.rotation.x = -runCycle;
+                }
+
+                // Animate Scenery & Trees
+                sceneryObjects.forEach(obj => {
+                    obj.position.z += speed;
+                    if (obj.position.z > 10) obj.position.z -= 220;
+                });
+
+                // Spawn Obstacles & Collectibles
+                spawnObstaclesAndCollectibles();
+
+                // Move & Check Obstacles
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    const obs = obstacles[i];
+                    obs.position.z += speed;
+
+                    const dz = Math.abs(obs.position.z - playerGroup.position.z);
+                    const dx = Math.abs(obs.position.x - playerGroup.position.x);
+
+                    if (dz < 0.85 && dx < 0.85) {
+                        if (obs.obstacleType === 'LOG' && playerY > 0.5) {
+                            // Safely jumped over log
+                        } else if (obs.obstacleType === 'RIVER' && (playerY > 0.45 || dx < 0.6)) {
+                            // Safely crossed river
+                        } else {
+                            if (hasShield) {
+                                // Shield protects player from hit
+                                hasShield = false;
+                                shieldMesh.visible = false;
+                                sfx.playHit();
+                                scene.remove(obs);
+                                obstacles.splice(i, 1);
+                                continue;
+                            } else {
+                                triggerGameOver();
+                                break;
+                            }
+                        }
+                    }
+
+                    if (obs.position.z > 10) {
+                        scene.remove(obs);
+                        obstacles.splice(i, 1);
+                    }
+                }
+
+                // Collect Gold Coins
+                for (let i = coins.length - 1; i >= 0; i--) {
+                    const coin = coins[i];
+                    coin.position.z += speed;
+                    coin.rotation.y += 0.08;
+
+                    const dz = Math.abs(coin.position.z - playerGroup.position.z);
+                    const dx = Math.abs(coin.position.x - playerGroup.position.x);
+
+                    if (dz < 0.85 && dx < 0.85 && Math.abs(coin.position.y - playerY) < 1.3) {
+                        coinsCollected++;
+                        document.getElementById('coin-val').innerText = coinsCollected;
+                        sfx.playCoin();
+                        scene.remove(coin);
+                        coins.splice(i, 1);
+                    } else if (coin.position.z > 10) {
+                        scene.remove(coin);
+                        coins.splice(i, 1);
+                    }
+                }
+
+                // Collect Shield Powerup
+                for (let i = powerups.length - 1; i >= 0; i--) {
+                    const p = powerups[i];
+                    p.position.z += speed;
+                    p.rotation.y += 0.05;
+
+                    const dz = Math.abs(p.position.z - playerGroup.position.z);
+                    const dx = Math.abs(p.position.x - playerGroup.position.x);
+
+                    if (dz < 0.85 && dx < 0.85) {
+                        hasShield = true;
+                        shieldMesh.visible = true;
+                        sfx.playPowerup();
+                        scene.remove(p);
+                        powerups.splice(i, 1);
+                    } else if (p.position.z > 10) {
+                        scene.remove(p);
+                        powerups.splice(i, 1);
+                    }
+                }
+
+                // Animate Ambient Particles (Fireflies)
+                particles.forEach(p => {
+                    const positions = p.geo.attributes.position.array;
+                    for (let i = 1; i < positions.length; i += 3) {
+                        positions[i] += Math.sin(Date.now() * 0.002 + i) * 0.01;
+                    }
+                    p.geo.attributes.position.needsUpdate = true;
+                });
+            }
+
             renderer.render(scene, camera);
+        }
+
+        function startGame() {
+            sfx.init();
+            distance = 0;
+            coinsCollected = 0;
+            currentLane = 1;
+            targetX = 0;
+            playerGroup.position.set(0, 0, 0);
+            isVictoryReached = false;
+            hasShield = false;
+            shieldMesh.visible = false;
+
+            document.getElementById('dist-val').innerText = '0';
+            document.getElementById('coin-val').innerText = '0';
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('progress-text').innerText = '0%';
+
+            // Clear Scene Obstacles
+            obstacles.forEach(o => scene.remove(o));
+            coins.forEach(c => scene.remove(c));
+            powerups.forEach(p => scene.remove(p));
+            obstacles = [];
+            coins = [];
+            powerups = [];
+
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-gameover').classList.add('hidden');
+            document.getElementById('screen-victory').classList.add('hidden');
+
+            isPlaying = true;
+        }
+
+        function triggerGameOver() {
+            sfx.playHit();
+            isPlaying = false;
+            document.getElementById('go-dist').innerText = `${Math.floor(distance)}m`;
+            document.getElementById('go-coins').innerText = coinsCollected;
+            document.getElementById('screen-gameover').classList.remove('hidden');
+        }
+
+        function triggerVictory() {
+            isVictoryReached = true;
+            sfx.playVictory();
+
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 150,
+                    spread: 90,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            document.getElementById('screen-victory').classList.remove('hidden');
         }
 
         function onWindowResize() {
@@ -462,9 +1009,18 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // Chạy game
-        init3D();
-        animate();
+        window.onload = function() {
+            initEngine();
+            setupControls();
+            animate();
+
+            document.getElementById('btn-start').onclick = startGame;
+            document.getElementById('btn-restart').onclick = startGame;
+            document.getElementById('btn-victory-restart').onclick = startGame;
+            document.getElementById('btn-continue').onclick = () => {
+                document.getElementById('screen-victory').classList.add('hidden');
+            };
+        };
     </script>
 </body>
 </html>

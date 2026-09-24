@@ -1,162 +1,877 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="mainstyle.css">
-    <link rel="stylesheet" href="function.js">
-    <script src="function.js" ></script>
-    <title>Porfolio</title>
-    <link rel="icon" type="img/jpg" style="border-radius: 50%;" href="avatar.jpg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THIÊN THAI RUN - Cung Đường Xanh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            overflow: hidden;
+            background-color: #0c1a0e;
+        }
+        #game-canvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        .text-shadow-glow {
+            text-shadow: 0 0 12px rgba(74, 222, 128, 0.6);
+        }
+        .text-shadow-strong {
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            transition: all 0.2s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.6);
+        }
+        .btn-gradient:active {
+            transform: translateY(1px);
+        }
+        /* Mobile touch swipe zone */
+        .touch-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+        }
+    </style>
 </head>
-<body>
-    <div class="header">
-        <div class="logo_about">
-            <img src="avatar.jpg" alt="Logo" onclick="location.assign('index.html')">
-        </div>
-        <div>
-            <ul class="header__about">
-                <li class="header__about-item" onclick="location.assign('#home')"><a class="header__about-link">Trang chủ</a></li>
-                <li class="header__about-item" onclick="location.assign('#info')"><a class="header__about-link"></a> Bản thân</li>
-                <li class="header__about-item" onclick="location.assign('#pic')"><a class="header__about-link"></a>Hình ảnh</li>
-                <li class="header__about-item" onclick="location.assign('#feedback')"><a class="header__about-link"></a> Góp ý</li>
-                <li class="header__about-item" onclick="location.assign('#contact')"><a class="header__about-link"></a> Liên hệ</li>
-            </ul>
-        </div>
-        <div class="hide_goup" id="myBtn" onclick="location.assign('#home')">
-            <img src="arrow-up.png" sizes="16x16" alt="">
-        </div>
-    </div>
-    <div class="home" id="home">
-        <div class="wrapper">
-            <div class="static-txt">Chào bạn...Mình là</div>
-            <ul class="dynamic-txts">
-                <li><span>Trần Anh Khoa</span></li>
-                <li><span></span>Nhân viên Hành chính Tổng hợp</li>
-                <li><span>SPK</span></li>
-            </ul>
-        </div>
-    </div>
-    <div class="info">
-        <div class="col-25">
-            <div id="info" class="title">THÔNG TIN BẢN THÂN</div>
-            <table>
-                <tr>
-                    <th>Họ tên:</th>
-                    <td>Trần Anh Khoa</td>
-                </tr>
-                <tr>
-                    <th>Nghề nghiệp:</th>
-                    <td>Nhân viên Trung tâm dịch vụ sự nghiệp công phường An Cựu</td>
-                </tr>
-                <tr>
-                    <th>Ngày sinh:</th>
-                    <td>18/09/2002</td>
-                </tr>
-                <tr>
-                    <th>Nơi sinh:</th>
-                    <td>TP.Huế</td>
-                </tr>
-                <tr>
-                    <th>Cung hoàng đạo:</th>
-                    <td>Xử Nữ</td>
-                </tr>
-                <tr>
-                    <th>Sở thích:</th>
-                    <td>Không có</td>
-                </tr>
-                <tr>
-                    <th>Tính cách:</th>
-                    <td>Hướng nội part time, đa sầu-đa cảm-đa nghĩ, vui vẻ, thân thiện, dễ gần</td>
-                </tr>
-                <tr>
-                    <th>Tình trạng hôn nhân:</th>
-                    <td>đã có chủ</td>
-                </tr>
-            </table>
-        </div>
-        <div class="col-75">
-            <div class="title__product">ÂM NHẠC GIẢI TRÍ:</div>
-            <div class="grid-container">
-                <div><iframe src="https://www.youtube.com/watch?v=gJAbDSse5WM?autoplay=1" alt="Product" width="420" height="300"></iframe></div>
-                <div><iframe src="https://www.youtube.com/watch?v=oMGPJ4uE_W8&list=RDoMGPJ4uE_W8&start_radio=1" alt="Product" width="420" height="300"></iframe></div>
-                <div><iframe src="https://www.youtube.com/watch?v=SnB4M9ygl38&list=RDSnB4M9ygl38&start_radio=1" alt="Product" width="420" height="300"></iframe></div>
-                <div><iframe src="https://www.youtube.com/watch?v=OmfG5jX1f3g&list=RDOmfG5jX1f3g&start_radio=1" alt="Product" width="420" height="300"></iframe></div>
-            </div>
-        </div>
-    </div>
-        <div class="container-slideshow" id="pic">
+<body class="bg-gray-900 text-white relative">
 
-            <!-- Full-width images with number text -->
-            <div class="mySlides">
-                <img src="1.jpg" style="width: 300px; margin-left: auto; margin-right: auto;">
-            </div>
-        
-            <div class="mySlides">
-                <img src="2.jpg" style="width: 300px; margin-left: auto; margin-right: auto;">
+    <!-- Canvas for 3D Graphics -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Game HUD Layer -->
+    <div id="hud-overlay" class="absolute top-0 left-0 w-full h-full pointer-events-none flex flex-col justify-between p-4 md:p-6 z-20 hidden">
+        <!-- Top Stats Bar -->
+        <div class="flex justify-between items-start w-full max-w-4xl mx-auto">
+            <!-- Distance & Speed -->
+            <div class="bg-black/60 backdrop-blur-md border border-green-500/30 rounded-2xl px-5 py-3 shadow-lg">
+                <div class="text-xs text-green-400 uppercase tracking-widest font-semibold">Quãng đường</div>
+                <div class="text-2xl md:text-3xl font-black text-white"><span id="hud-distance">0</span> <span class="text-sm font-normal text-gray-300">m</span></div>
             </div>
 
-            <div class="mySlides">
-                <img src="3.jpg" style="width: 300px; margin-left: auto; margin-right: auto;">
+            <!-- Title Badge -->
+            <div class="hidden md:flex flex-col items-center bg-black/40 backdrop-blur-sm border border-green-500/20 px-6 py-2 rounded-full">
+                <span class="text-green-400 font-extrabold tracking-wider text-sm">THIÊN THAI RUN 2026</span>
+                <span class="text-xs text-emerald-200">Cung Đường Xanh - Rừng Thông An Cựu</span>
             </div>
-        
-            <div class="mySlides">
-                <img src="4.jpg" style="width: 300px; margin-left: auto; margin-right: auto;">
-            </div>
-        
-            <div class="mySlides">
-                <img src="5.jpg" style="width: 300px; margin-left: auto; margin-right: auto;">
-            </div>
-        
-            <div class="mySlides">
-                <img src="6.jpg" style="width: 300px; margin-left: auto; margin-right: auto;">
-            </div>
-        
-            <!-- Next and previous buttons -->
-            <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-            <a class="next" onclick="plusSlides(1)">&#10095;</a>
-        
-            <!-- Thumbnail images -->
-            <div class="row">
-                <div class="column">
-                    <img class="demo cursor" src="1.jpg" style="width:100%" onclick="currentSlide(1)">
-                </div>
-                <div class="column">
-                    <img class="demo cursor" src="2.jpg" style="width:100%" onclick="currentSlide(2)">
-                </div>
-                <div class="column">
-                    <img class="demo cursor" src="3.jpg" style="width:100%" onclick="currentSlide(3)">
-                </div>
-                <div class="column">
-                    <img class="demo cursor" src="4.jpg" style="width:100%" onclick="currentSlide(4)">
-                </div>
-                <div class="column">
-                    <img class="demo cursor" src="5.jpg" style="width:100%" onclick="currentSlide(5)">
-                </div>
-                <div class="column">
-                    <img class="demo cursor" src="6.jpg" style="width:100%" onclick="currentSlide(6)">
-                </div>
-            </div>
-        </div>    
 
-    <div class="wrap-feedback">
-        <div class="label-register" id="feedback" style="line-height:200%;">
-            <form action="action_page.php" autocomplete="on">
-                <h1 class="title__feedback" style="text-align: center;" id="feedback">GÓP Ý!</h1>
-                <label for="name">Họ và tên:</label><br>
-                <input type="text" id="name" name="name" placeholder="Nguyễn Văn A" class="input-form-register"><br>
-                <label for="phonenumber">Số điện thoại:</label><br>
-                <input type="tel" id="pnumber" name="phonenumber" placeholder="1234567890" pattern="[0-9]{10}" class="input-form-register"><br>
-                <label for="advice">Lời góp ý:</label><br>
-                <textarea id="subject" name="subject" placeholder="Viết tại đây..." class="input-form-register" style="height:200px; width: 100%;"></textarea>
-                <input type="submit" value="GỬI" onclick="alert('Cảm ơn bạn đã góp ý!')" class="submit-btn">
-            </form>
+            <!-- Collected Leaves / Points -->
+            <div class="bg-black/60 backdrop-blur-md border border-green-500/30 rounded-2xl px-5 py-3 shadow-lg text-right">
+                <div class="text-xs text-green-400 uppercase tracking-widest font-semibold">Điểm Bình Yên 🍃</div>
+                <div class="text-2xl md:text-3xl font-black text-emerald-400"><span id="hud-score">0</span></div>
+            </div>
+        </div>
+
+        <!-- Controls Hint for Desktop -->
+        <div class="hidden md:flex justify-center pb-2 opacity-70">
+            <div class="bg-black/60 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full text-xs text-gray-300 flex gap-4">
+                <span>⬆️ / W / Space : Nhảy</span>
+                <span>⬇️ / S : Trượt</span>
+                <span>⬅️ ➡️ / A D : Đổi làn</span>
+            </div>
         </div>
     </div>
-    <footer id="contact" class="contact">
-        <p class="contact">Author: Trần Anh Khoa<br>
-        <a onclick="">anhkhoat363@gmail.com</a></p>
-    </footer>
+
+    <!-- Start / Main Menu Screen -->
+    <div id="start-screen" class="absolute inset-0 bg-gradient-to-b from-emerald-950/90 via-slate-900/95 to-black/95 z-30 flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-slate-900/90 border border-green-500/30 rounded-3xl p-6 md:p-8 text-center backdrop-blur-xl shadow-2xl relative overflow-hidden">
+            <!-- Decorative Green Glow -->
+            <div class="absolute -top-24 -left-24 w-48 h-48 bg-green-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="inline-block bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-xs font-bold tracking-wider mb-4 uppercase">
+                Giải Chạy Vì Môi Trường
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-300 to-teal-200 tracking-tight mb-1 text-shadow-glow">
+                THIÊN THAI RUN
+            </h1>
+            <p class="text-emerald-400 font-semibold text-sm mb-6 tracking-wide">CUNG ĐƯỜNG XANH - HÀNH TRÌNH BÌNH YÊN</p>
+
+            <div class="space-y-3 bg-black/40 rounded-2xl p-4 border border-white/5 text-left text-xs text-gray-300 mb-6">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">📍</span> <span>Địa điểm: <b>Rừng thông An Cựu & HV Phật giáo Việt Nam tại Huế</b></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🏃</span> <span>Hành động: Né chướng ngại vật & thu thập điểm Bình Yên</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🌲</span> <span>Thông điệp: <i>Vì màu xanh hôm nay, vì bình yên mai sau!</i></span>
+                </div>
+            </div>
+
+            <button id="start-btn" class="w-full py-4 text-lg font-bold text-white rounded-2xl btn-gradient flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider">
+                <span>Bắt Đầu Chạy</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 5l7 7-m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+
+            <div class="mt-4 text-xs text-gray-400">
+                Vuốt màn hình hoặc dùng phím <b>Mũi Tên / WASD</b> để điều khiển
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="absolute inset-0 bg-black/80 backdrop-blur-md z-30 flex items-center justify-center p-4 hidden">
+        <div class="max-w-md w-full bg-slate-900 border border-red-500/30 rounded-3xl p-6 md:p-8 text-center shadow-2xl relative">
+            <div class="w-16 h-16 bg-red-500/10 border border-red-500/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                🏃‍♂️💥
+            </div>
+
+            <h2 class="text-2xl md:text-3xl font-black text-white mb-1">KẾT THÚC HÀNH TRÌNH</h2>
+            <p class="text-gray-400 text-xs mb-6">Bạn đã vấp phải chướng ngại vật trên đường chạy!</p>
+
+            <!-- Results Card -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-black/50 border border-white/10 rounded-2xl p-3">
+                    <div class="text-xs text-gray-400">Quãng Đường</div>
+                    <div class="text-xl md:text-2xl font-black text-white"><span id="final-distance">0</span> m</div>
+                </div>
+                <div class="bg-black/50 border border-white/10 rounded-2xl p-3">
+                    <div class="text-xs text-gray-400">Điểm Thu Thập</div>
+                    <div class="text-xl md:text-2xl font-black text-emerald-400"><span id="final-score">0</span> 🍃</div>
+                </div>
+            </div>
+
+            <div class="bg-emerald-950/40 border border-green-500/30 p-4 rounded-2xl text-xs text-emerald-300 italic mb-6 leading-relaxed">
+                "Bảo vệ Rừng Thông An Cựu – Vì màu xanh hôm nay, vì bình yên mai sau!" 🌲💚
+            </div>
+
+            <button id="restart-btn" class="w-full py-4 text-base font-bold text-white rounded-2xl btn-gradient flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider">
+                <span>Chạy Lại</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Web Audio API Sound Generator for standalone audio
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playJump() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(450, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+            playCollect() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
+                osc.frequency.setValueAtTime(659.25, this.ctx.currentTime + 0.08); // E5
+                osc.frequency.setValueAtTime(783.99, this.ctx.currentTime + 0.16); // G5
+                gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+            playCrash() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+        }
+
+        const sound = new SoundFX();
+
+        let scene, camera, renderer;
+        let playerGroup, playerBody, playerShirt, limbs = {};
+        let terrainSegments = [];
+        let obstacles = [];
+        let collectibles = [];
+        let decorElements = [];
+
+        // Game Configuration & State
+        const LANES = [-2.2, 0, 2.2];
+        let currentLane = 1; // 0: Left, 1: Center, 2: Right
+        let targetX = LANES[1];
+        
+        let isPlaying = false;
+        let distance = 0;
+        let score = 0;
+        let speed = 0.35;
+        const baseSpeed = 0.35;
+        const maxSpeed = 0.85;
+
+        // Player Motion States
+        let playerY = 0;
+        let jumpVelocity = 0;
+        const gravity = 0.015;
+        let isJumping = false;
+        let isSliding = false;
+        let slideTimer = 0;
+        let animClock = 0;
+
+        // DOM Handles
+        const hudOverlay = document.getElementById('hud-overlay');
+        const startScreen = document.getElementById('start-screen');
+        const gameoverScreen = document.getElementById('gameover-screen');
+        const hudDistance = document.getElementById('hud-distance');
+        const hudScore = document.getElementById('hud-score');
+        const finalDistance = document.getElementById('final-distance');
+        const finalScore = document.getElementById('final-score');
+
+        function initEngine() {
+            const canvas = document.getElementById('game-canvas');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87ceeb); // Light sky blue
+            scene.fog = new THREE.FogExp2(0x9bd8b2, 0.018); // Soft green fog effect for pine forest vibe
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+            camera.position.set(0, 3.5, -6);
+            camera.lookAt(0, 1.5, 10);
+
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+            scene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0xfffaed, 0.85);
+            sunLight.position.set(20, 40, -20);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 1024;
+            sunLight.shadow.mapSize.height = 1024;
+            sunLight.shadow.camera.near = 0.5;
+            sunLight.shadow.camera.far = 150;
+            sunLight.shadow.camera.left = -15;
+            sunLight.shadow.camera.right = 15;
+            sunLight.shadow.camera.top = 30;
+            sunLight.shadow.camera.bottom = -10;
+            scene.add(sunLight);
+
+            createPlayer();
+            buildInitialTerrain();
+
+            window.addEventListener('resize', onWindowResize);
+            setupInput();
+        }
+
+        function createPlayer() {
+            playerGroup = new THREE.Group();
+
+            // Materials reflecting the runner description
+            const skinMat = new THREE.MeshLambertMaterial({ color: 0xffdbac });
+            const shirtMat = new THREE.MeshLambertMaterial({ color: 0x22c55e }); // Bright Green Athletic Shirt
+            const logoMat = new THREE.MeshLambertMaterial({ color: 0xffffff }); // Chest logo accent
+            const shortsMat = new THREE.MeshLambertMaterial({ color: 0x111827 }); // Black shorts
+            const socksMat = new THREE.MeshLambertMaterial({ color: 0xf9fafb }); // White socks
+            const shoesMat = new THREE.MeshLambertMaterial({ color: 0x1f2937 }); // Dark running shoes
+            const hairMat = new THREE.MeshLambertMaterial({ color: 0x27272a });
+
+            // Torso (Shirt)
+            const torsoGeo = new THREE.BoxGeometry(0.5, 0.6, 0.28);
+            const torso = new THREE.Mesh(torsoGeo, shirtMat);
+            torso.position.y = 1.1;
+            torso.castShadow = true;
+            playerGroup.add(torso);
+
+            // Shirt Chest Badge ("THIÊN THAI RUN")
+            const badgeGeo = new THREE.BoxGeometry(0.35, 0.2, 0.02);
+            const badge = new THREE.Mesh(badgeGeo, logoMat);
+            badge.position.set(0, 1.12, 0.14);
+            playerGroup.add(badge);
+
+            // Head
+            const headGeo = new THREE.BoxGeometry(0.32, 0.32, 0.32);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.y = 1.6;
+            head.castShadow = true;
+            playerGroup.add(head);
+
+            // Hair
+            const hairGeo = new THREE.BoxGeometry(0.34, 0.1, 0.34);
+            const hair = new THREE.Mesh(hairGeo, hairMat);
+            hair.position.set(0, 1.73, 0);
+            playerGroup.add(hair);
+
+            // Shorts
+            const shortsGeo = new THREE.BoxGeometry(0.48, 0.25, 0.26);
+            const shorts = new THREE.Mesh(shortsGeo, shortsMat);
+            shorts.position.y = 0.72;
+            shorts.castShadow = true;
+            playerGroup.add(shorts);
+
+            // Left Arm
+            const armGeo = new THREE.BoxGeometry(0.12, 0.5, 0.12);
+            limbs.leftArm = new THREE.Mesh(armGeo, skinMat);
+            limbs.leftArm.position.set(-0.32, 1.1, 0);
+            limbs.leftArm.geometry.translate(0, -0.2, 0);
+            limbs.leftArm.castShadow = true;
+            playerGroup.add(limbs.leftArm);
+
+            // Right Arm
+            limbs.rightArm = new THREE.Mesh(armGeo, skinMat);
+            limbs.rightArm.position.set(0.32, 1.1, 0);
+            limbs.rightArm.geometry.translate(0, -0.2, 0);
+            limbs.rightArm.castShadow = true;
+            playerGroup.add(limbs.rightArm);
+
+            // Left Leg Group
+            limbs.leftLeg = new THREE.Group();
+            limbs.leftLeg.position.set(-0.16, 0.6, 0);
+            
+            const legGeo = new THREE.BoxGeometry(0.14, 0.35, 0.14);
+            const leftLegMesh = new THREE.Mesh(legGeo, skinMat);
+            leftLegMesh.position.y = -0.15;
+            leftLegMesh.castShadow = true;
+            limbs.leftLeg.add(leftLegMesh);
+
+            const sockGeo = new THREE.BoxGeometry(0.15, 0.12, 0.15);
+            const leftSock = new THREE.Mesh(sockGeo, socksMat);
+            leftSock.position.y = -0.32;
+            limbs.leftLeg.add(leftSock);
+
+            const shoeGeo = new THREE.BoxGeometry(0.16, 0.12, 0.28);
+            const leftShoe = new THREE.Mesh(shoeGeo, shoesMat);
+            leftShoe.position.set(0, -0.38, 0.05);
+            leftShoe.castShadow = true;
+            limbs.leftLeg.add(leftShoe);
+
+            playerGroup.add(limbs.leftLeg);
+
+            // Right Leg Group
+            limbs.rightLeg = new THREE.Group();
+            limbs.rightLeg.position.set(0.16, 0.6, 0);
+
+            const rightLegMesh = new THREE.Mesh(legGeo, skinMat);
+            rightLegMesh.position.y = -0.15;
+            rightLegMesh.castShadow = true;
+            limbs.rightLeg.add(rightLegMesh);
+
+            const rightSock = new THREE.Mesh(sockGeo, socksMat);
+            rightSock.position.y = -0.32;
+            limbs.rightLeg.add(rightSock);
+
+            const rightShoe = new THREE.Mesh(shoeGeo, shoesMat);
+            rightShoe.position.set(0, -0.38, 0.05);
+            rightShoe.castShadow = true;
+            limbs.rightLeg.add(rightShoe);
+
+            playerGroup.add(limbs.rightLeg);
+
+            playerGroup.position.set(LANES[currentLane], 0, 0);
+            scene.add(playerGroup);
+        }
+
+        function createPineTree() {
+            const tree = new THREE.Group();
+
+            // Trunk
+            const trunkGeo = new THREE.CylinderGeometry(0.2, 0.35, 2.5, 6);
+            const trunkMat = new THREE.MeshLambertMaterial({ color: 0x5c4033 });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 1.25;
+            trunk.castShadow = true;
+            tree.add(trunk);
+
+            // Foliage Layers (Pine Cone Shapes)
+            const pineMat = new THREE.MeshLambertMaterial({ color: 0x1e5631 });
+            const layers = [
+                { r: 1.4, h: 2.0, y: 2.8 },
+                { r: 1.1, h: 1.8, y: 3.8 },
+                { r: 0.8, h: 1.5, y: 4.8 }
+            ];
+
+            layers.forEach(l => {
+                const foliageGeo = new THREE.ConeGeometry(l.r, l.h, 7);
+                const foliage = new THREE.Mesh(foliageGeo, pineMat);
+                foliage.position.y = l.y;
+                foliage.castShadow = true;
+                tree.add(foliage);
+            });
+
+            return tree;
+        }
+
+        function createHuePagodaGate() {
+            const gate = new THREE.Group();
+            const stoneMat = new THREE.MeshLambertMaterial({ color: 0x8a8a8a });
+            const roofMat = new THREE.MeshLambertMaterial({ color: 0x991b1b });
+
+            // Pillars
+            const p1 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4, 0.6), stoneMat);
+            p1.position.set(-3.2, 2, 0);
+            const p2 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4, 0.6), stoneMat);
+            p2.position.set(3.2, 2, 0);
+            gate.add(p1, p2);
+
+            // Arch / Beam
+            const beam = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.6, 0.8), stoneMat);
+            beam.position.set(0, 3.8, 0);
+            gate.add(beam);
+
+            // Pagoda Curved Roof
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(4.8, 1.5, 4), roofMat);
+            roof.rotation.y = Math.PI / 4;
+            roof.position.set(0, 4.8, 0);
+            gate.add(roof);
+
+            return gate;
+        }
+
+        function createLeafCollectible() {
+            const leafGroup = new THREE.Group();
+            const leafMat = new THREE.MeshStandardMaterial({
+                color: 0x4ade80,
+                emissive: 0x15803d,
+                roughness: 0.3,
+                metalness: 0.2
+            });
+
+            // Diamond/Leaf shape
+            const geo = new THREE.OctahedronGeometry(0.35, 1);
+            geo.scale(1, 1.4, 0.3);
+            const leaf = new THREE.Mesh(geo, leafMat);
+            leaf.position.y = 0.8;
+            leafGroup.add(leaf);
+
+            return leafGroup;
+        }
+
+        function createObstacle(type) {
+            const obs = new THREE.Group();
+            
+            if (type === 'LOG') {
+                // Fallen Log (Jump over)
+                const logMat = new THREE.MeshLambertMaterial({ color: 0x4a2e18 });
+                const logGeo = new THREE.CylinderGeometry(0.35, 0.35, 1.8, 8);
+                const log = new THREE.Mesh(logGeo, logMat);
+                log.rotation.z = Math.PI / 2;
+                log.position.y = 0.35;
+                log.castShadow = true;
+                obs.add(log);
+                obs.userData = { type: 'JUMP', width: 1.6, height: 0.7 };
+            } else if (type === 'ROCK') {
+                // Stone Boulder (Change lane)
+                const rockMat = new THREE.MeshLambertMaterial({ color: 0x6b7280 });
+                const rockGeo = new THREE.DodecahedronGeometry(0.55, 1);
+                const rock = new THREE.Mesh(rockGeo, rockMat);
+                rock.position.y = 0.45;
+                rock.scale.set(1.2, 0.9, 1.1);
+                rock.castShadow = true;
+                obs.add(rock);
+                obs.userData = { type: 'ALL', width: 1.2, height: 1.0 };
+            } else if (type === 'BARRIER') {
+                // High Wooden Arch Barrier (Slide under)
+                const woodMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+                const post1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 2.2, 0.15), woodMat);
+                post1.position.set(-0.85, 1.1, 0);
+                const post2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 2.2, 0.15), woodMat);
+                post2.position.set(0.85, 1.1, 0);
+                const topBar = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.5, 0.15), woodMat);
+                topBar.position.set(0, 1.8, 0);
+
+                obs.add(post1, post2, topBar);
+                obs.userData = { type: 'SLIDE', width: 1.8, height: 2.2, clearBottom: 1.2 };
+            }
+
+            return obs;
+        }
+
+        function createTerrainSegment(zPosition) {
+            const segment = new THREE.Group();
+            segment.position.z = zPosition;
+
+            // Green Track Path
+            const pathMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
+            const pathGeo = new THREE.PlaneGeometry(6.6, 20);
+            const path = new THREE.Mesh(pathGeo, pathMat);
+            path.rotation.x = -Math.PI / 2;
+            path.position.y = 0;
+            path.receiveShadow = true;
+            segment.add(path);
+
+            // Side Grass/Pine forest Floor
+            const grassMat = new THREE.MeshLambertMaterial({ color: 0x064e3b });
+            const leftGrassGeo = new THREE.PlaneGeometry(30, 20);
+            const leftGrass = new THREE.Mesh(leftGrassGeo, grassMat);
+            leftGrass.rotation.x = -Math.PI / 2;
+            leftGrass.position.set(-18.3, -0.01, 0);
+            leftGrass.receiveShadow = true;
+
+            const rightGrass = leftGrass.clone();
+            rightGrass.position.x = 18.3;
+            segment.add(leftGrass, rightGrass);
+
+            // Lane Divider Markings (Subtle yellow-green dashes)
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0x86efac });
+            for (let z = -8; z <= 8; z += 4) {
+                [-1.1, 1.1].forEach(x => {
+                    const line = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 1.5), lineMat);
+                    line.rotation.x = -Math.PI / 2;
+                    line.position.set(x, 0.01, z);
+                    segment.add(line);
+                });
+            }
+
+            // Populate Side Trees (An Cựu Pine Forest)
+            for (let z = -9; z <= 9; z += 4.5) {
+                // Left Forest Trees
+                const treeL = createPineTree();
+                treeL.position.set(-4.5 - Math.random() * 6, 0, z + (Math.random() - 0.5));
+                const scaleL = 0.8 + Math.random() * 0.5;
+                treeL.scale.set(scaleL, scaleL, scaleL);
+                segment.add(treeL);
+
+                // Right Forest Trees
+                const treeR = createPineTree();
+                treeR.position.set(4.5 + Math.random() * 6, 0, z + (Math.random() - 0.5));
+                const scaleR = 0.8 + Math.random() * 0.5;
+                treeR.scale.set(scaleR, scaleR, scaleR);
+                segment.add(treeR);
+            }
+
+            // Occasional Pagoda Gate Landmark along track
+            if (Math.random() < 0.15 && zPosition > 40) {
+                const gate = createHuePagodaGate();
+                gate.position.set(0, 0, 0);
+                segment.add(gate);
+            }
+
+            scene.add(segment);
+            terrainSegments.push(segment);
+        }
+
+        function buildInitialTerrain() {
+            for (let i = 0; i < 10; i++) {
+                createTerrainSegment(i * 20);
+            }
+        }
+
+        function spawnObstaclesAndItems(zDist) {
+            // Randomly choose lane
+            const laneIdx = Math.floor(Math.random() * 3);
+            const laneX = LANES[laneIdx];
+
+            // Decide spawn type
+            const rand = Math.random();
+
+            if (rand < 0.45) {
+                // Spawn Obstacle
+                const types = ['LOG', 'ROCK', 'BARRIER'];
+                const selectedType = types[Math.floor(Math.random() * types.length)];
+                const obs = createObstacle(selectedType);
+                obs.position.set(laneX, 0, zDist);
+                scene.add(obs);
+                obstacles.push(obs);
+            } else {
+                // Spawn Collectibles (Line of 3 green leaves)
+                for (let k = 0; k < 3; k++) {
+                    const leaf = createLeafCollectible();
+                    leaf.position.set(laneX, 0.3, zDist + (k * 2.2));
+                    scene.add(leaf);
+                    collectibles.push(leaf);
+                }
+            }
+        }
+
+        function setupInput() {
+            // Keyboard Listener
+            window.addEventListener('keydown', (e) => {
+                if (!isPlaying) return;
+
+                if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && currentLane > 0) {
+                    currentLane--;
+                } else if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && currentLane < 2) {
+                    currentLane++;
+                } else if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') && !isJumping && !isSliding) {
+                    isJumping = true;
+                    jumpVelocity = 0.28;
+                    sound.playJump();
+                } else if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && !isSliding) {
+                    isSliding = true;
+                    slideTimer = 25; // frames duration
+                    if (isJumping) {
+                        isJumping = false;
+                        playerY = 0;
+                    }
+                }
+            });
+
+            // Touch Controls (Swipe Gestures)
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            window.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            window.addEventListener('touchend', (e) => {
+                if (!isPlaying) return;
+                const deltaX = e.changedTouches[0].clientX - touchStartX;
+                const deltaY = e.changedTouches[0].clientY - touchStartY;
+
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    // Horizontal Swipe
+                    if (deltaX < -30 && currentLane > 0) {
+                        currentLane--;
+                    } else if (deltaX > 30 && currentLane < 2) {
+                        currentLane++;
+                    }
+                } else {
+                    // Vertical Swipe
+                    if (deltaY < -30 && !isJumping && !isSliding) {
+                        isJumping = true;
+                        jumpVelocity = 0.28;
+                        sound.playJump();
+                    } else if (deltaY > 30 && !isSliding) {
+                        isSliding = true;
+                        slideTimer = 25;
+                        if (isJumping) {
+                            isJumping = false;
+                            playerY = 0;
+                        }
+                    }
+                }
+            }, { passive: true });
+
+            // Button Event Listeners
+            document.getElementById('start-btn').addEventListener('click', () => {
+                sound.init();
+                startGame();
+            });
+
+            document.getElementById('restart-btn').addEventListener('click', () => {
+                resetGame();
+                startGame();
+            });
+        }
+
+        function updatePlayer() {
+            // Smooth lane switching interpolation
+            targetX = LANES[currentLane];
+            playerGroup.position.x += (targetX - playerGroup.position.x) * 0.25;
+
+            // Handle Jumping
+            if (isJumping) {
+                playerY += jumpVelocity;
+                jumpVelocity -= gravity;
+
+                if (playerY <= 0) {
+                    playerY = 0;
+                    isJumping = false;
+                }
+            }
+
+            // Handle Sliding
+            if (isSliding) {
+                slideTimer--;
+                playerGroup.scale.set(1, 0.5, 1);
+                if (slideTimer <= 0) {
+                    isSliding = false;
+                    playerGroup.scale.set(1, 1, 1);
+                }
+            } else if (!isSliding && playerGroup.scale.y !== 1) {
+                playerGroup.scale.set(1, 1, 1);
+            }
+
+            playerGroup.position.y = playerY;
+
+            // Running Leg & Arm Swing Animation
+            animClock += speed * 0.8;
+            if (!isJumping && !isSliding) {
+                const swing = Math.sin(animClock) * 0.6;
+                limbs.leftLeg.rotation.x = swing;
+                limbs.rightLeg.rotation.x = -swing;
+                limbs.leftArm.rotation.x = -swing * 0.8;
+                limbs.rightArm.rotation.x = swing * 0.8;
+            } else if (isJumping) {
+                limbs.leftLeg.rotation.x = -0.6;
+                limbs.rightLeg.rotation.x = 0.4;
+                limbs.leftArm.rotation.x = 0.8;
+                limbs.rightArm.rotation.x = -0.8;
+            }
+        }
+
+        function updateWorld() {
+            // Advance Distance & Speed
+            distance += speed * 0.5;
+            speed = Math.min(maxSpeed, baseSpeed + (distance * 0.0003));
+
+            hudDistance.innerText = Math.floor(distance);
+            hudScore.innerText = score;
+
+            // Move Terrain Segments
+            terrainSegments.forEach(seg => {
+                seg.position.z -= speed;
+                if (seg.position.z < -20) {
+                    seg.position.z += terrainSegments.length * 20;
+
+                    // Spawn new obstacles further down the path
+                    spawnObstaclesAndItems(seg.position.z + 10);
+                }
+            });
+
+            // Move & Spin Collectibles
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                const leaf = collectibles[i];
+                leaf.position.z -= speed;
+                leaf.rotation.y += 0.05;
+
+                // Pickup Collision Check
+                const distZ = Math.abs(leaf.position.z - playerGroup.position.z);
+                const distX = Math.abs(leaf.position.x - playerGroup.position.x);
+
+                if (distZ < 0.8 && distX < 0.7 && playerY < 1.5) {
+                    sound.playCollect();
+                    score += 10;
+                    scene.remove(leaf);
+                    collectibles.splice(i, 1);
+                    continue;
+                }
+
+                // Cleanup passed items
+                if (leaf.position.z < -10) {
+                    scene.remove(leaf);
+                    collectibles.splice(i, 1);
+                }
+            }
+
+            // Move & Check Obstacles Collision
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obs = obstacles[i];
+                obs.position.z -= speed;
+
+                const distZ = Math.abs(obs.position.z - playerGroup.position.z);
+                const distX = Math.abs(obs.position.x - playerGroup.position.x);
+
+                // Precise Hitbox Logic
+                if (distZ < 0.75 && distX < 0.75) {
+                    const obsType = obs.userData.type;
+
+                    let hit = false;
+                    if (obsType === 'ALL') {
+                        hit = true;
+                    } else if (obsType === 'JUMP' && playerY < 0.6) {
+                        hit = true; // Failed to jump over log
+                    } else if (obsType === 'SLIDE' && !isSliding) {
+                        hit = true; // Failed to slide under high barrier
+                    }
+
+                    if (hit) {
+                        triggerGameOver();
+                        return;
+                    }
+                }
+
+                // Cleanup passed obstacles
+                if (obs.position.z < -10) {
+                    scene.remove(obs);
+                    obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        function startGame() {
+            isPlaying = true;
+            startScreen.classList.add('hidden');
+            gameoverScreen.classList.add('hidden');
+            hudOverlay.classList.remove('hidden');
+        }
+
+        function triggerGameOver() {
+            isPlaying = false;
+            sound.playCrash();
+
+            finalDistance.innerText = Math.floor(distance);
+            finalScore.innerText = score;
+
+            hudOverlay.classList.add('hidden');
+            gameoverScreen.classList.remove('hidden');
+        }
+
+        function resetGame() {
+            // Reset player and values
+            distance = 0;
+            score = 0;
+            speed = baseSpeed;
+            currentLane = 1;
+            playerGroup.position.set(LANES[1], 0, 0);
+
+            // Clear Active Obstacles & Collectibles
+            obstacles.forEach(o => scene.remove(o));
+            collectibles.forEach(c => scene.remove(c));
+            obstacles = [];
+            collectibles = [];
+
+            // Reset Terrain positions
+            terrainSegments.forEach((seg, idx) => {
+                seg.position.z = idx * 20;
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isPlaying) {
+                updatePlayer();
+                updateWorld();
+            } else {
+                // Idle menu background camera swing
+                const time = Date.now() * 0.0005;
+                camera.position.x = Math.sin(time) * 1.5;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Initialize when page loads
+        window.onload = function () {
+            initEngine();
+            animate();
+        };
+    </script>
 </body>
 </html>

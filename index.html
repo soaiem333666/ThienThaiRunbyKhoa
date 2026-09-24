@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thiên Thai Run - Hành Trình 6KM</title>
+    <title>Thiên Thai Run - Endless Runner</title>
     <style>
         body {
             margin: 0;
@@ -24,7 +24,6 @@
             height: 100%;
             pointer-events: none;
             display: flex;
-            flex-direction: column;
             justify-content: space-between;
             padding: 20px;
             box-sizing: border-box;
@@ -34,27 +33,11 @@
             font-size: 20px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            background: rgba(0, 70, 30, 0.6);
+            background: rgba(0, 70, 30, 0.7);
             padding: 10px 20px;
             border-radius: 20px;
             border: 2px solid #4CAF50;
-            display: inline-block;
-        }
-        #progress-bar-container {
-            width: 100%;
-            max-width: 400px;
-            height: 20px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 10px;
-            border: 2px solid #fff;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-        #progress-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            transition: width 0.1s;
+            height: fit-content;
         }
         .overlay {
             position: absolute;
@@ -87,18 +70,8 @@
         .btn:hover {
             transform: scale(1.05);
         }
-        .medal-icon {
-            font-size: 80px;
-            margin: 15px 0;
-            animation: bounce 1s infinite alternate;
-        }
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-15px); }
-        }
         .hidden { display: none !important; }
     </style>
-    <!-- Nhúng thư viện Three.js để vẽ đồ họa 3D -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -106,91 +79,69 @@
     <div id="canvas-container"></div>
 
     <div id="ui-layer">
-        <div>
-            <div class="hud">
-                🏃 Quãng đường: <span id="dist-text">0.00</span> / 6.00 KM
-            </div>
-            <div id="progress-bar-container">
-                <div id="progress-bar"></div>
-            </div>
+        <div class="hud">
+            🏃 Quãng đường: <span id="dist-text">0.00</span> KM
         </div>
-        <div class="hud" style="align-self: flex-end;">
+        <div class="hud">
             🍃 Điểm Xanh: <span id="score-text">0</span>
         </div>
     </div>
 
-    <!-- Màn hình Bắt đầu -->
     <div id="start-screen" class="overlay">
         <h1 style="color: #4CAF50; font-size: 42px; margin-bottom: 10px;">THIÊN THAI RUN 🏃‍♂️</h1>
         <p style="font-size: 18px; max-width: 500px; line-height: 1.5;">
-            Chạy qua cung đường rừng thông An Cựu, vượt chướng ngại vật và hoàn thành **6.00 KM** để nhận Huy chương Vinh quang[cite: 2]!
+            Trải nghiệm chạy vô tận xuyên rừng thông An Cựu. Né chướng ngại vật và lập kỷ lục quãng đường xa nhất!
         </p>
         <p style="font-size: 15px; color: #aaa;">
-            🎮 <b>Phím mũi tên Trái/Phải</b> hoặc <b>Vuốt màn hình</b> để đổi làn đường.<br>
+            🎮 <b>Mũi tên Trái/Phải</b> hoặc <b>Vuốt màn hình</b> để đổi làn.<br>
             🎮 <b>Mũi tên Lên / Space</b> để Nhảy.
         </p>
         <button class="btn" onclick="startGame()">BẮT ĐẦU CHẠY</button>
     </div>
 
-    <!-- Màn hình Game Over -->
     <div id="gameover-screen" class="overlay hidden">
-        <h1 style="color: #f44336; font-size: 40px;">BẠN ĐÃ TẤP LỀ! 💥</h1>
-        <p style="font-size: 20px;">Quãng đường đã đi: <span id="final-dist">0</span> KM</p>
+        <h1 style="color: #f44336; font-size: 40px;">KẾT THÚC HÀNH TRÌNH! 💥</h1>
+        <p style="font-size: 22px;">Quãng đường đạt được: <b style="color:#4CAF50"><span id="final-dist">0</span> KM</b></p>
+        <p style="font-size: 20px;">Điểm thu thập: <b style="color:#FFD700"><span id="final-score">0</span></b></p>
         <button class="btn" onclick="resetGame()">CHẠY LẠI</button>
     </div>
 
-    <!-- Màn hình Thắng cuộc (Cán đích 6km) -->
-    <div id="victory-screen" class="overlay hidden">
-        <h1 style="color: #FFD700; font-size: 38px;">CHÚC MỪNG HOÀN THÀNH 6KM! 🎉</h1>
-        <div class="medal-icon">🥇</div>
-        <p style="font-size: 20px; color: #8BC34A;">Bạn đã nhận được <b>Huy Chương Thiên Thai Run</b>!</p>
-        <p style="font-size: 16px;">Bảo vệ rừng thông An Cựu - Vì màu xanh hôm nay! 🌲[cite: 2]</p>
-        <button class="btn" onclick="resetGame()">CHẠY TRẢI NGHIỆM LẠI</button>
-    </div>
-
     <script>
-        // Cấu hình trò chơi
-        const TARGET_DIST_KM = 6.0;
-        const TARGET_DIST_M = TARGET_DIST_KM * 1000; 
-        const GAME_SPEED = 0.6; // Tốc độ chạy
-        const LANES = [-2.5, 0, 2.5]; // 3 làn đường (Trái, Giữa, Phải)
+        const GAME_SPEED = 0.5;
+        const LANES = [-2.5, 0, 2.5];
 
         let scene, camera, renderer;
-        let player, playerGroup;
-        let currentLane = 1; // 0: Trái, 1: Giữa, 2: Phải
+        let playerGroup, leftArm, rightArm, leftLeg, rightLeg;
+        let currentLane = 1;
         let isJumping = false;
         let jumpVelocity = 0;
         const gravity = 0.015;
 
-        let distanceCovered = 0; // Đơn vị: mét trong game
+        let distanceCovered = 0;
         let score = 0;
         let isGameRunning = false;
+        let animTime = 0;
 
         let obstacles = [];
         let collectibles = [];
-        let trees = [];
         let roadTiles = [];
 
         function init3D() {
             const container = document.getElementById('canvas-container');
             
-            // Scene
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87CEEB); // Bầu trời xanh
-            scene.fog = new THREE.FogExp2(0x87CEEB, 0.015);
+            scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
 
-            // Camera
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 3.5, -6);
             camera.lookAt(0, 1.5, 5);
 
-            // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             container.appendChild(renderer.domElement);
 
-            // Ánh sáng
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
 
@@ -199,52 +150,80 @@
             dirLight.castShadow = true;
             scene.add(dirLight);
 
-            // Tạo nhân vật
-            createPlayer();
-
-            // Tạo con đường ban đầu
+            createAnimatedPlayer();
             createRoad();
 
-            // Tự động căn chỉnh màn hình khi resize
             window.addEventListener('resize', onWindowResize);
-            
-            // Lắng nghe sự kiện điều khiển
             setupControls();
         }
 
-        function createPlayer() {
+        // Tạo nhân vật có khớp tay chân để cử động
+        function createAnimatedPlayer() {
             playerGroup = new THREE.Group();
 
-            // Thân người (Áo xanh Thiên Thai)
-            const bodyGeo = new THREE.CylinderGeometry(0.4, 0.3, 1.2, 8);
-            const bodyMat = new THREE.MeshLambertMaterial({ color: 0x2e7d32 }); // Mẫu áo xanh
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
-            body.position.y = 1;
-            body.castShadow = true;
-            playerGroup.add(body);
+            // Áo Thiên Thai Run (Phối xanh lá nõn chuối & xanh đậm)
+            const torsoGeo = new THREE.BoxGeometry(0.6, 0.8, 0.35);
+            const torsoMat = new THREE.MeshLambertMaterial({ color: 0x4caf50 });
+            const torso = new THREE.Mesh(torsoGeo, torsoMat);
+            torso.position.y = 1.1;
+            torso.castShadow = true;
+            playerGroup.add(torso);
+
+            // In họa tiết chữ/logo giả lập trên áo
+            const logoGeo = new THREE.PlaneGeometry(0.35, 0.25);
+            const logoMat = new THREE.MeshBasicMaterial({ color: 0x1b5e20, side: THREE.DoubleSide });
+            const logo = new THREE.Mesh(logoGeo, logoMat);
+            logo.position.set(0, 1.15, 0.18);
+            playerGroup.add(logo);
 
             // Đầu
-            const headGeo = new THREE.SphereGeometry(0.25, 16, 16);
-            const headMat = new THREE.MeshLambertMaterial({ color: 0xffdbac });
-            const head = new THREE.Mesh(headGeo, headMat);
-            head.position.y = 1.8;
+            const headGeo = new THREE.SphereGeometry(0.22, 16, 16);
+            const skinMat = new THREE.MeshLambertMaterial({ color: 0xffdbac });
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.y = 1.7;
             playerGroup.add(head);
 
-            // Quần ngắn
-            const shortsGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.4, 8);
+            // Quần đùi đen
+            const shortsGeo = new THREE.BoxGeometry(0.62, 0.3, 0.37);
             const shortsMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
             const shorts = new THREE.Mesh(shortsGeo, shortsMat);
-            shorts.position.y = 0.5;
+            shorts.position.y = 0.65;
             playerGroup.add(shorts);
+
+            // Tay Trái
+            const armGeo = new THREE.BoxGeometry(0.15, 0.6, 0.15);
+            leftArm = new THREE.Mesh(armGeo, skinMat);
+            leftArm.position.set(-0.4, 1.1, 0);
+            leftArm.geometry.translate(0, -0.25, 0);
+            playerGroup.add(leftArm);
+
+            // Tay Phải
+            rightArm = new THREE.Mesh(armGeo, skinMat);
+            rightArm.position.set(0.4, 1.1, 0);
+            rightArm.geometry.translate(0, -0.25, 0);
+            playerGroup.add(rightArm);
+
+            // Chân Trái
+            const legGeo = new THREE.BoxGeometry(0.18, 0.6, 0.18);
+            const shoeMat = new THREE.MeshLambertMaterial({ color: 0x212121 });
+            
+            leftLeg = new THREE.Mesh(legGeo, skinMat);
+            leftLeg.position.set(-0.18, 0.5, 0);
+            leftLeg.geometry.translate(0, -0.25, 0);
+            playerGroup.add(leftLeg);
+
+            // Chân Phải
+            rightLeg = new THREE.Mesh(legGeo, skinMat);
+            rightLeg.position.set(0.18, 0.5, 0);
+            rightLeg.geometry.translate(0, -0.25, 0);
+            playerGroup.add(rightLeg);
 
             playerGroup.position.set(LANES[currentLane], 0, 0);
             scene.add(playerGroup);
-            player = playerGroup;
         }
 
         function createRoad() {
-            // Tạo 10 đoạn đường cuốn chiếu
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 12; i++) {
                 spawnRoadTile(i * 20);
             }
         }
@@ -252,15 +231,14 @@
         function spawnRoadTile(zPos) {
             const tileGroup = new THREE.Group();
 
-            // Mặt đường
             const roadGeo = new THREE.PlaneGeometry(9, 20);
-            const roadMat = new THREE.MeshLambertMaterial({ color: 0x555555 });
+            const roadMat = new THREE.MeshLambertMaterial({ color: 0x4e4e4e });
             const road = new THREE.Mesh(roadGeo, roadMat);
             road.rotation.x = -Math.PI / 2;
             road.receiveShadow = true;
             tileGroup.add(road);
 
-            // Vạch kẻ đường (Phân 3 làn)
+            // Kẻ làn
             for (let l of [-1.25, 1.25]) {
                 const lineGeo = new THREE.PlaneGeometry(0.1, 20);
                 const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -271,21 +249,20 @@
                 tileGroup.add(line);
             }
 
-            // Đồi cỏ 2 bên
-            const grassGeo = new THREE.PlaneGeometry(15, 20);
-            const grassMat = new THREE.MeshLambertMaterial({ color: 0x388e3c });
+            // Đồi cỏ & Cây thông 2 bên đường
+            const grassGeo = new THREE.PlaneGeometry(20, 20);
+            const grassMat = new THREE.MeshLambertMaterial({ color: 0x2e7d32 });
 
             const leftGrass = new THREE.Mesh(grassGeo, grassMat);
             leftGrass.rotation.x = -Math.PI / 2;
-            leftGrass.position.x = -12;
+            leftGrass.position.x = -14.5;
             tileGroup.add(leftGrass);
 
             const rightGrass = new THREE.Mesh(grassGeo, grassMat);
             rightGrass.rotation.x = -Math.PI / 2;
-            rightGrass.position.x = 12;
+            rightGrass.position.x = 14.5;
             tileGroup.add(rightGrass);
 
-            // Thêm cây thông 2 bên rừng An Cựu
             for (let i = -8; i <= 8; i += 4) {
                 spawnTree(tileGroup, -7 - Math.random() * 3, i);
                 spawnTree(tileGroup, 7 + Math.random() * 3, i);
@@ -298,229 +275,18 @@
 
         function spawnTree(parent, x, z) {
             const tree = new THREE.Group();
-            // Thân cây
             const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.5);
-            const trunkMat = new THREE.MeshLambertMaterial({ color: 0x5d4037 });
+            const trunkMat = new THREE.MeshLambertMaterial({ color: 0x4a2c11 });
             const trunk = new THREE.Mesh(trunkGeo, trunkMat);
             trunk.position.y = 0.75;
             tree.add(trunk);
 
-            // Tán lá thông
-            const leavesGeo = new THREE.ConeGeometry(1.2, 3, 6);
-            const leavesMat = new THREE.MeshLambertMaterial({ color: 0x1b5e20 });
+            const leavesGeo = new THREE.ConeGeometry(1.3, 3.2, 6);
+            const leavesMat = new THREE.MeshLambertMaterial({ color: 0x1b4d3e });
             const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-            leaves.position.y = 2.5;
+            leaves.position.y = 2.6;
             tree.add(leaves);
 
             tree.position.set(x, 0, z);
             parent.add(tree);
         }
-
-        function spawnObstacle(zPos) {
-            const laneIndex = Math.floor(Math.random() * 3);
-            const x = LANES[laneIndex];
-
-            // Rào chắn / Chướng ngại vật
-            const geo = new THREE.BoxGeometry(1.8, 0.8, 0.5);
-            const mat = new THREE.MeshLambertMaterial({ color: 0xd32f2f });
-            const obs = new THREE.Mesh(geo, mat);
-            obs.position.set(x, 0.4, zPos);
-            obs.castShadow = true;
-
-            scene.add(obs);
-            obstacles.push(obs);
-        }
-
-        function spawnCollectible(zPos) {
-            const laneIndex = Math.floor(Math.random() * 3);
-            const x = LANES[laneIndex];
-
-            // Vật phẩm Lá cây may mắn
-            const geo = new THREE.OctahedronGeometry(0.35);
-            const mat = new THREE.MeshBasicMaterial({ color: 0x76ff03 });
-            const item = new THREE.Mesh(geo, mat);
-            item.position.set(x, 1.0, zPos);
-
-            scene.add(item);
-            collectibles.push(item);
-        }
-
-        function setupControls() {
-            document.addEventListener('keydown', (e) => {
-                if (!isGameRunning) return;
-
-                if (e.key === 'ArrowLeft' || e.key === 'a') {
-                    if (currentLane > 0) currentLane--;
-                } else if (e.key === 'ArrowRight' || e.key === 'd') {
-                    if (currentLane < 2) currentLane++;
-                } else if ((e.key === 'ArrowUp' || e.key === ' ') && !isJumping) {
-                    isJumping = true;
-                    jumpVelocity = 0.28;
-                }
-            });
-
-            // Vuốt trên thiết bị di động
-            let touchStartX = 0;
-            let touchStartY = 0;
-            document.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            });
-
-            document.addEventListener('touchend', (e) => {
-                if (!isGameRunning) return;
-                let diffX = e.changedTouches[0].clientX - touchStartX;
-                let diffY = e.changedTouches[0].clientY - touchStartY;
-
-                if (Math.abs(diffX) > Math.abs(diffY)) {
-                    if (diffX > 30 && currentLane < 2) currentLane++;
-                    else if (diffX < -30 && currentLane > 0) currentLane--;
-                } else {
-                    if (diffY < -30 && !isJumping) {
-                        isJumping = true;
-                        jumpVelocity = 0.28;
-                    }
-                }
-            });
-        }
-
-        function startGame() {
-            document.getElementById('start-screen').classList.add('hidden');
-            isGameRunning = true;
-        }
-
-        function resetGame() {
-            // Dọn dẹp đối tượng cũ
-            obstacles.forEach(o => scene.remove(o));
-            collectibles.forEach(c => scene.remove(c));
-            obstacles = [];
-            collectibles = [];
-
-            distanceCovered = 0;
-            score = 0;
-            currentLane = 1;
-            player.position.set(LANES[1], 0, 0);
-
-            document.getElementById('score-text').innerText = '0';
-            document.getElementById('dist-text').innerText = '0.00';
-            document.getElementById('progress-bar').style.width = '0%';
-
-            document.getElementById('gameover-screen').classList.add('hidden');
-            document.getElementById('victory-screen').classList.add('hidden');
-
-            isGameRunning = true;
-        }
-
-        function gameOver() {
-            isGameRunning = false;
-            const distKM = (distanceCovered / 1000 * 30).toFixed(2);
-            document.getElementById('final-dist').innerText = distKM;
-            document.getElementById('gameover-screen').classList.remove('hidden');
-        }
-
-        function victory() {
-            isGameRunning = false;
-            document.getElementById('victory-screen').classList.remove('hidden');
-        }
-
-        function update() {
-            if (!isGameRunning) return;
-
-            // Tăng quãng đường (Tỉ lệ mô phỏng để đạt 6km)
-            distanceCovered += GAME_SPEED;
-            const currentKM = Math.min(TARGET_DIST_KM, (distanceCovered / 1000 * 30)); 
-            
-            document.getElementById('dist-text').innerText = currentKM.toFixed(2);
-            document.getElementById('progress-bar').style.width = (currentKM / TARGET_DIST_KM * 100) + '%';
-
-            // Kiểm tra chiến thắng (Đủ 6KM)
-            if (currentKM >= TARGET_DIST_KM) {
-                victory();
-                return;
-            }
-
-            // Di chuyển nhân vật mượt mà sang các làn
-            player.position.x += (LANES[currentLane] - player.position.x) * 0.2;
-
-            // Xử lý nhảy
-            if (isJumping) {
-                player.position.y += jumpVelocity;
-                jumpVelocity -= gravity;
-                if (player.position.y <= 0) {
-                    player.position.y = 0;
-                    isJumping = false;
-                }
-            }
-
-            // Di chuyển đường & các vật thể về phía sau
-            roadTiles.forEach(tile => {
-                tile.position.z -= GAME_SPEED;
-                if (tile.position.z < -20) {
-                    tile.position.z += 200; // Đưa đường về phía xa
-                }
-            });
-
-            // Sinh vật thể ngẫu nhiên
-            if (Math.random() < 0.03) {
-                spawnObstacle(player.position.z + 80);
-            }
-            if (Math.random() < 0.04) {
-                spawnCollectible(player.position.z + 80);
-            }
-
-            // Cập nhật Chướng ngại vật
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                let obs = obstacles[i];
-                obs.position.z -= GAME_SPEED;
-
-                // Va chạm
-                if (Math.abs(obs.position.z - player.position.z) < 0.6 &&
-                    Math.abs(obs.position.x - player.position.x) < 0.8 &&
-                    player.position.y < 0.8) {
-                    gameOver();
-                }
-
-                if (obs.position.z < -10) {
-                    scene.remove(obs);
-                    obstacles.splice(i, 1);
-                }
-            }
-
-            // Cập nhật Vật phẩm
-            for (let i = collectibles.length - 1; i >= 0; i--) {
-                let item = collectibles[i];
-                item.position.z -= GAME_SPEED;
-                item.rotation.y += 0.05;
-
-                // Ăn điểm
-                if (Math.abs(item.position.z - player.position.z) < 0.7 &&
-                    Math.abs(item.position.x - player.position.x) < 0.7) {
-                    score += 10;
-                    document.getElementById('score-text').innerText = score;
-                    scene.remove(item);
-                    collectibles.splice(i, 1);
-                } else if (item.position.z < -10) {
-                    scene.remove(item);
-                    collectibles.splice(i, 1);
-                }
-            }
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            update();
-            renderer.render(scene, camera);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // Khởi chạy 
-        init3D();
-        animate();
-    </script>
-</body>
-</html>

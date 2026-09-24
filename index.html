@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THIÊN THAI RUN - Cung Đường Xanh</title>
+    <title>THIÊN THAI RUN - 6KM Rừng Thông An Cựu</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js for 3D graphics -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for Victory Fireworks -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
@@ -33,15 +35,15 @@
 
         /* Glassmorphism and Forest Style UI */
         .wood-panel {
-            background: rgba(18, 48, 23, 0.85);
-            backdrop-filter: blur(8px);
+            background: rgba(18, 48, 23, 0.88);
+            backdrop-filter: blur(10px);
             border: 2px solid #52a038;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(138, 226, 52, 0.3);
         }
 
         .gold-border {
             border: 2px solid #f39c12;
-            box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+            box-shadow: 0 0 12px rgba(243, 156, 18, 0.6);
         }
 
         .text-glow-green {
@@ -49,10 +51,10 @@
         }
 
         .text-glow-gold {
-            text-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+            text-shadow: 0 0 12px rgba(251, 191, 36, 0.9);
         }
 
-        /* Leaf energy bar animation */
+        /* Leaf energy & progress bar animation */
         @keyframes energyPulse {
             0% { box-shadow: 0 0 5px #4ade80; }
             50% { box-shadow: 0 0 15px #4ade80; }
@@ -74,6 +76,16 @@
             background-image: radial-gradient(circle at center, rgba(34, 197, 94, 0.15) 0%, rgba(13, 30, 17, 0.95) 100%);
             pointer-events: none;
         }
+
+        @keyframes goldGlow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.6)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.9)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.6)); }
+        }
+
+        .victory-medal {
+            animation: goldGlow 2.5s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="relative w-screen h-screen overflow-hidden text-white select-none">
@@ -85,54 +97,77 @@
     <canvas id="game-canvas"></canvas>
 
     <!-- UI Overlay / HUD -->
-    <div id="ui-container" class="relative z-10 w-full h-full flex flex-col justify-between p-4 pointer-events-none">
+    <div id="ui-container" class="relative z-10 w-full h-full flex flex-col justify-between p-3 sm:p-5 pointer-events-none">
         
         <!-- Top Bar Header -->
-        <div class="flex justify-between items-center w-full max-w-4xl mx-auto pointer-events-auto">
-            
-            <!-- Points Display -->
-            <div class="wood-panel rounded-2xl px-4 py-2 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-amber-500/30 border border-amber-400 flex items-center justify-center text-amber-300">
-                    <i class="fa-solid fa-leaf text-xl"></i>
+        <div class="flex flex-col gap-2 w-full max-w-5xl mx-auto pointer-events-auto">
+            <div class="flex justify-between items-center w-full">
+                
+                <!-- Points Display -->
+                <div class="wood-panel rounded-2xl px-3 sm:px-4 py-2 flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-500/30 border border-amber-400 flex items-center justify-center text-amber-300">
+                        <i class="fa-solid fa-leaf text-base sm:text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] sm:text-xs font-bold text-green-300 uppercase tracking-wider">Điểm Số</div>
+                        <div id="score-text" class="text-lg sm:text-2xl font-black text-amber-400 text-glow-gold tracking-wide">0</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="text-xs font-bold text-green-300 uppercase tracking-wider">Points</div>
-                    <div id="score-text" class="text-2xl font-black text-amber-400 text-glow-gold tracking-wide">0</div>
+
+                <!-- Header Logo Text -->
+                <div class="hidden md:flex flex-col items-center">
+                    <h1 class="text-2xl lg:text-3xl font-black italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-200 to-yellow-300 drop-shadow-md">
+                        THIÊN THAI RUN
+                    </h1>
+                    <span class="text-[10px] font-bold text-green-300 tracking-widest bg-emerald-950/80 px-3 py-0.5 rounded-full border border-green-500/50 uppercase">
+                        Rừng Thông An Cựu • Cung Đường 6KM
+                    </span>
+                </div>
+
+                <!-- Leaf Energy Bar -->
+                <div class="wood-panel rounded-2xl px-3 sm:px-4 py-2 flex items-center gap-2 sm:gap-3 w-40 sm:w-60">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-green-500/30 border border-green-400 flex items-center justify-center text-green-400">
+                        <i class="fa-solid fa-bolt text-xs sm:text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between text-[10px] sm:text-xs font-bold text-green-300 mb-1">
+                            <span>NĂNG LƯỢNG</span>
+                            <span id="energy-text">100%</span>
+                        </div>
+                        <div class="w-full h-2.5 sm:h-3 bg-black/50 rounded-full overflow-hidden p-0.5 border border-green-600/40">
+                            <div id="energy-bar" class="h-full bg-gradient-to-r from-emerald-500 to-green-300 rounded-full energy-fill transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Header Logo Text -->
-            <div class="hidden sm:flex flex-col items-center">
-                <h1 class="text-3xl font-black italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-200 to-yellow-300 drop-shadow-md">
-                    THIÊN THAI RUN
-                </h1>
-                <span class="text-xs font-bold text-green-300 tracking-widest bg-emerald-950/80 px-3 py-0.5 rounded-full border border-green-500/50">
-                    RỪNG THÔNG AN CỰU
-                </span>
-            </div>
-
-            <!-- Leaf Energy Bar -->
-            <div class="wood-panel rounded-2xl px-4 py-2 flex items-center gap-3 w-48 sm:w-64">
-                <div class="w-8 h-8 rounded-full bg-green-500/30 border border-green-400 flex items-center justify-center text-green-400">
-                    <i class="fa-solid fa-bolt text-sm"></i>
+            <!-- 6KM RACE PROGRESS TRACK BAR -->
+            <div class="wood-panel rounded-2xl p-2.5 w-full flex items-center gap-3 border-amber-400/50">
+                <div class="flex items-center gap-1.5 text-amber-300 font-black text-xs sm:text-sm flex-shrink-0">
+                    <i class="fa-solid fa-flag-checkered text-amber-400"></i>
+                    <span>6.0 KM</span>
                 </div>
-                <div class="flex-1">
-                    <div class="flex justify-between text-xs font-bold text-green-300 mb-1">
-                        <span>LEAF ENERGY</span>
-                        <span id="energy-text">100%</span>
+                <div class="flex-1 relative">
+                    <div class="w-full h-3.5 bg-black/60 rounded-full overflow-hidden border border-emerald-500/40 p-0.5 relative">
+                        <div id="race-progress-bar" class="h-full bg-gradient-to-r from-yellow-500 via-amber-400 to-green-400 rounded-full transition-all duration-200" style="width: 0%;"></div>
                     </div>
-                    <div class="w-full h-3 bg-black/50 rounded-full overflow-hidden p-0.5 border border-green-600/40">
-                        <div id="energy-bar" class="h-full bg-gradient-to-r from-emerald-500 to-green-300 rounded-full energy-fill transition-all duration-300" style="width: 100%;"></div>
+                    <!-- Runner Avatar Marker on Progress Bar -->
+                    <div id="progress-runner-icon" class="absolute top-1/2 -translate-y-1/2 -ml-3 transition-all duration-200 text-amber-300 text-xs drop-shadow" style="left: 0%;">
+                        <i class="fa-solid fa-person-running text-sm text-yellow-300"></i>
                     </div>
+                </div>
+                <div class="text-right flex-shrink-0 font-bold text-xs sm:text-sm">
+                    <span id="distance-text" class="text-amber-300 font-mono font-black">0.00</span>
+                    <span class="text-green-300 text-[10px] sm:text-xs"> / 6.00 km</span>
                 </div>
             </div>
         </div>
 
         <!-- Leaderboard Floating Panel (Right Side) -->
-        <div class="hidden md:flex absolute right-6 top-24 wood-panel rounded-2xl p-4 w-60 flex-col gap-3 pointer-events-auto border-emerald-500/50 shadow-2xl">
+        <div class="hidden lg:flex absolute right-6 top-28 wood-panel rounded-2xl p-4 w-60 flex-col gap-3 pointer-events-auto border-emerald-500/50 shadow-2xl">
             <div class="flex items-center gap-2 border-b border-green-700/50 pb-2">
                 <i class="fa-solid fa-trophy text-amber-400 text-lg"></i>
-                <h3 class="font-bold text-green-200 uppercase tracking-wider text-sm">Leaderboard</h3>
+                <h3 class="font-bold text-green-200 uppercase tracking-wider text-sm">Bảng Xếp Hạng</h3>
             </div>
             
             <div id="leaderboard-list" class="space-y-2 text-xs">
@@ -141,89 +176,104 @@
                         <span class="w-4 text-center">1</span>
                         <span>Runner_Hue</span>
                     </div>
-                    <span>12,450</span>
+                    <span>14:20 (6km)</span>
                 </div>
                 <div class="flex items-center justify-between p-2 rounded bg-black/20 text-slate-300">
                     <div class="flex items-center gap-2">
                         <span class="w-4 text-center">2</span>
                         <span>AnCuu_Green</span>
                     </div>
-                    <span>9,820</span>
+                    <span>15:45 (6km)</span>
                 </div>
                 <div class="flex items-center justify-between p-2 rounded bg-black/20 text-slate-300">
                     <div class="flex items-center gap-2">
                         <span class="w-4 text-center">3</span>
                         <span>PhatGiao_Hue</span>
                     </div>
-                    <span>8,110</span>
+                    <span>16:10 (6km)</span>
                 </div>
                 <div id="user-rank-row" class="flex items-center justify-between p-2 rounded bg-green-800/50 border border-green-400/50 text-white font-bold mt-2">
                     <div class="flex items-center gap-2">
                         <span class="w-4 text-center">--</span>
                         <span>Bạn</span>
                     </div>
-                    <span id="user-high-score">0</span>
+                    <span id="user-high-score">0.00 km</span>
                 </div>
             </div>
         </div>
 
         <!-- Touch Controls Helper (Visible on Mobile) -->
-        <div class="sm:hidden flex justify-between items-center px-4 mb-4 pointer-events-auto">
-            <button id="btn-left" class="w-16 h-16 rounded-full wood-panel flex items-center justify-center text-2xl text-green-300 active:scale-95 transition-transform">
+        <div class="sm:hidden flex justify-between items-center px-2 mb-2 pointer-events-auto">
+            <button id="btn-left" class="w-14 h-14 rounded-full wood-panel flex items-center justify-center text-xl text-green-300 active:scale-95 transition-transform">
                 <i class="fa-solid fa-arrow-left"></i>
             </button>
-            <div class="flex gap-4">
-                <button id="btn-jump" class="w-16 h-16 rounded-full wood-panel flex items-center justify-center text-2xl text-amber-400 active:scale-95 transition-transform">
+            <div class="flex gap-3">
+                <button id="btn-jump" class="w-14 h-14 rounded-full wood-panel flex items-center justify-center text-xl text-amber-400 active:scale-95 transition-transform">
                     <i class="fa-solid fa-arrow-up"></i>
                 </button>
-                <button id="btn-slide" class="w-16 h-16 rounded-full wood-panel flex items-center justify-center text-2xl text-amber-400 active:scale-95 transition-transform">
+                <button id="btn-slide" class="w-14 h-14 rounded-full wood-panel flex items-center justify-center text-xl text-amber-400 active:scale-95 transition-transform">
                     <i class="fa-solid fa-arrow-down"></i>
                 </button>
             </div>
-            <button id="btn-right" class="w-16 h-16 rounded-full wood-panel flex items-center justify-center text-2xl text-green-300 active:scale-95 transition-transform">
+            <button id="btn-right" class="w-14 h-14 rounded-full wood-panel flex items-center justify-center text-xl text-green-300 active:scale-95 transition-transform">
                 <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
     </div>
 
-    <!-- Start / Game Over Screen Overlay -->
-    <div id="overlay-screen" class="absolute inset-0 z-20 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <!-- Overlay Screen (Start / Game Over / Victory) -->
+    <div id="overlay-screen" class="absolute inset-0 z-20 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
         <div class="wood-panel max-w-lg w-full rounded-3xl p-6 sm:p-8 text-center flex flex-col items-center border-2 border-green-400/80 shadow-2xl relative overflow-hidden">
             
             <div class="absolute -top-12 -right-12 w-32 h-32 bg-green-500/20 rounded-full blur-2xl"></div>
             
-            <!-- Title Graphic -->
-            <div class="mb-4">
-                <div class="inline-block bg-gradient-to-r from-emerald-600 to-green-500 text-amber-300 font-bold px-4 py-1 rounded-full text-xs uppercase tracking-widest border border-amber-400/40 mb-2">
-                    Hành Trình Bình Yên - 13.9.2026
+            <!-- Victory Medal Graphic (Show on Victory) -->
+            <div id="victory-medal-container" class="hidden my-2">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-300 to-amber-200 border-4 border-yellow-100 flex items-center justify-center text-5xl text-emerald-950 shadow-2xl victory-medal mx-auto">
+                    <i class="fa-solid fa-medal"></i>
                 </div>
-                <h2 id="overlay-title" class="text-4xl sm:text-5xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-green-300 to-emerald-400 drop-shadow-lg">
-                    THIÊN THAI RUN
-                </h2>
-                <p id="overlay-subtitle" class="text-green-200 text-sm font-semibold mt-1">Chạy Xuyên Rừng Thông An Cựu - Học Viện Phật Giáo Huế</p>
             </div>
 
-            <!-- High Score Display inside Overlay -->
-            <div id="score-summary" class="hidden my-4 p-4 rounded-2xl bg-black/40 border border-green-500/30 w-full">
-                <div class="text-xs text-green-300 font-bold uppercase">Điểm Chạy Lần Này</div>
-                <div id="final-score" class="text-4xl font-black text-amber-400 my-1">0</div>
-                <div class="text-xs text-slate-300">Kỷ lục cá nhân: <span id="best-score" class="text-emerald-300 font-bold">0</span></div>
+            <!-- Title Graphic -->
+            <div class="mb-3">
+                <div id="race-tag" class="inline-block bg-gradient-to-r from-emerald-600 to-green-500 text-amber-300 font-bold px-4 py-1 rounded-full text-xs uppercase tracking-widest border border-amber-400/40 mb-2">
+                    CUNG ĐƯỜNG 6KM • HÀNH TRÌNH BÌNH YÊN
+                </div>
+                <h2 id="overlay-title" class="text-3xl sm:text-5xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-green-300 to-emerald-400 drop-shadow-lg uppercase">
+                    THIÊN THAI RUN
+                </h2>
+                <p id="overlay-subtitle" class="text-green-200 text-xs sm:text-sm font-semibold mt-1">Chạy Xuyên Rừng Thông An Cựu - Học Viện Phật Giáo Huế</p>
+            </div>
+
+            <!-- Score / Distance Summary inside Overlay -->
+            <div id="score-summary" class="hidden my-3 p-4 rounded-2xl bg-black/50 border border-green-500/40 w-full grid grid-cols-2 gap-3 text-center">
+                <div>
+                    <div class="text-[10px] text-green-300 font-bold uppercase">Quãng Đường</div>
+                    <div id="final-distance" class="text-2xl sm:text-3xl font-black text-amber-400 my-0.5">0.00 km</div>
+                </div>
+                <div>
+                    <div class="text-[10px] text-green-300 font-bold uppercase">Thời Gian Run</div>
+                    <div id="final-time" class="text-2xl sm:text-3xl font-black text-emerald-300 my-0.5">00:00</div>
+                </div>
+                <div class="col-span-2 border-t border-green-700/40 pt-2 text-xs text-slate-300">
+                    Điểm số: <span id="final-score" class="text-amber-300 font-bold">0</span> | Kỷ lục: <span id="best-score" class="text-emerald-300 font-bold">0.00 km</span>
+                </div>
             </div>
 
             <!-- Character Preview Avatar / Tag -->
-            <div class="my-3 p-3 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 w-full flex items-center gap-4 text-left">
-                <div class="w-14 h-14 rounded-full bg-green-800 border-2 border-amber-400 overflow-hidden flex-shrink-0 flex items-center justify-center text-2xl text-amber-300">
+            <div class="my-2 p-3 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 w-full flex items-center gap-4 text-left">
+                <div class="w-12 h-12 rounded-full bg-green-800 border-2 border-amber-400 overflow-hidden flex-shrink-0 flex items-center justify-center text-xl text-amber-300">
                     <i class="fa-solid fa-person-running"></i>
                 </div>
                 <div>
-                    <div class="text-xs text-green-400 font-bold">VẬN ĐỘNG VIÊN</div>
-                    <div class="font-bold text-white text-sm">Trần Văn An - Thiên Thai Run</div>
-                    <div class="text-xs text-slate-300">Áo xanh lá - Tất trắng - Giày đen</div>
+                    <div class="text-[10px] text-green-400 font-bold uppercase">Vận Động Viên Chính</div>
+                    <div class="font-bold text-white text-sm">Thiên Thai Runner</div>
+                    <div class="text-xs text-slate-300">Áo xanh lá Thiên Thai Run - Quần đùi - Tất trắng - Giày đen</div>
                 </div>
             </div>
 
             <!-- Controls Info -->
-            <div class="my-3 text-xs text-slate-300 grid grid-cols-2 gap-2 w-full">
+            <div id="controls-guide" class="my-2 text-xs text-slate-300 grid grid-cols-2 gap-2 w-full">
                 <div class="bg-black/30 p-2 rounded-lg border border-white/5 flex items-center justify-center gap-2">
                     <span class="px-2 py-0.5 bg-emerald-800 rounded font-mono text-amber-300">← →</span>
                     <span>Đổi Làn</span>
@@ -235,26 +285,27 @@
             </div>
 
             <!-- Action Button -->
-            <button id="btn-start" class="w-full mt-2 py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-emerald-950 font-black text-xl tracking-wider uppercase shadow-lg shadow-amber-500/30 transform transition active:scale-95 flex items-center justify-center gap-2">
+            <button id="btn-start" class="w-full mt-2 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-emerald-950 font-black text-lg sm:text-xl tracking-wider uppercase shadow-lg shadow-amber-500/30 transform transition active:scale-95 flex items-center justify-center gap-2">
                 <i class="fa-solid fa-play"></i>
-                <span id="btn-start-text">BẮT ĐẦU CHẠY</span>
+                <span id="btn-start-text">BẮT ĐẦU CHẠY 6KM</span>
             </button>
 
             <!-- Location Note -->
-            <div class="mt-4 text-[10px] text-green-300/70 uppercase tracking-widest">
-                Địa điểm: Trung Tâm Văn Hóa Huyện Hương Thủy / Rừng Thông An Cựu
+            <div class="mt-3 text-[10px] text-green-300/70 uppercase tracking-widest">
+                Đích Đến: Trung Tâm Văn Hóa Huyện Hương Thủy / Rừng Thông An Cựu
             </div>
         </div>
     </div>
 
     <!-- JavaScript Game Logic -->
     <script>
-        // Game Constants & Configuration
+        // Game Target & Constants
+        const TARGET_DISTANCE_METERS = 6000; // 6km = 6,000 meters
         const LANES = [-2.2, 0, 2.2];
         const RUN_SPEED_INITIAL = 0.28;
-        const RUN_SPEED_MAX = 0.55;
-        const JUMP_FORCE = 0.22;
-        const GRAVITY = 0.011;
+        const RUN_SPEED_MAX = 0.58;
+        const JUMP_FORCE = 0.24;
+        const GRAVITY = 0.012;
 
         // State variables
         let scene, camera, renderer;
@@ -262,7 +313,7 @@
         let leftLeg, rightLeg, leftArm, rightArm;
         let headMesh;
         
-        let gameState = 'START'; // 'START', 'PLAYING', 'GAMEOVER'
+        let gameState = 'START'; // 'START', 'PLAYING', 'GAMEOVER', 'VICTORY'
         let currentLane = 1; // 0: Left, 1: Center, 2: Right
         let targetX = LANES[1];
         let playerY = 0;
@@ -273,7 +324,10 @@
 
         let gameSpeed = RUN_SPEED_INITIAL;
         let score = 0;
-        let highScore = localStorage.getItem('thienthai_high_score') || 0;
+        let distanceMeters = 0; // Current distance run in meters
+        let startTime = 0;
+        let elapsedTime = 0;
+        let highScoreDistance = localStorage.getItem('thienthai_high_dist') || 0;
         let energy = 100;
         let animFrameId;
 
@@ -281,7 +335,6 @@
         const trackSegments = [];
         const obstacles = [];
         const collectibles = [];
-        const decorations = [];
 
         // Colors
         const COLOR_PINE = 0x1e4620;
@@ -290,7 +343,7 @@
         const COLOR_SKIN = 0xe0ac69;
         const COLOR_GOLD = 0xfbc02d;
 
-        // Initialize Audio Synthesizer
+        // Audio Synthesizer
         let audioCtx = null;
 
         function playSound(type) {
@@ -308,7 +361,7 @@
                 if (type === 'coin') {
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(800, now);
-                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                    osc.frequency.exponentialRampToValueAtTime(1300, now + 0.1);
                     gain.gain.setValueAtTime(0.15, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
                     osc.start(now);
@@ -316,7 +369,7 @@
                 } else if (type === 'jump') {
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(250, now);
-                    osc.frequency.exponentialRampToValueAtTime(500, now + 0.15);
+                    osc.frequency.exponentialRampToValueAtTime(550, now + 0.15);
                     gain.gain.setValueAtTime(0.2, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                     osc.start(now);
@@ -329,9 +382,23 @@
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
                     osc.start(now);
                     osc.stop(now + 0.25);
+                } else if (type === 'win') {
+                    // Victory fanfare chord
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.type = 'triangle';
+                        o.frequency.setValueAtTime(freq, now + (idx * 0.08));
+                        g.connect(audioCtx.destination);
+                        o.connect(g);
+                        g.gain.setValueAtTime(0.2, now + (idx * 0.08));
+                        g.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+                        o.start(now + (idx * 0.08));
+                        o.stop(now + 1.2);
+                    });
                 }
             } catch (e) {
-                // Audio context block handling
+                // Audio fallback
             }
         }
 
@@ -374,20 +441,19 @@
             }
 
             // High Score UI Update
-            document.getElementById('user-high-score').textContent = Number(highScore).toLocaleString();
-            document.getElementById('best-score').textContent = Number(highScore).toLocaleString();
+            const recordKm = (highScoreDistance / 1000).toFixed(2);
+            document.getElementById('user-high-score').textContent = recordKm + ' km';
+            document.getElementById('best-score').textContent = recordKm + ' km';
 
             window.addEventListener('resize', onWindowResize);
         }
 
-        // Build 3D Custom Runner Character
+        // Build 3D Runner Character Matching Poster
         function createPlayer() {
             playerGroup = new THREE.Group();
-
-            // Root mesh for animation
             playerMesh = new THREE.Group();
 
-            // Torso (Green T-Shirt with Pine Graphics pattern)
+            // Torso (Green T-Shirt)
             const torsoGeo = new THREE.CylinderGeometry(0.35, 0.28, 0.8, 8);
             const torsoMat = new THREE.MeshLambertMaterial({ color: COLOR_SHIRT });
             const torso = new THREE.Mesh(torsoGeo, torsoMat);
@@ -395,8 +461,8 @@
             torso.castShadow = true;
             playerMesh.add(torso);
 
-            // Print Shirt Graphic Accent (Light Green Overlay)
-            const logoGeo = new THREE.PlaneGeometry(0.3, 0.3);
+            // Graphic Accent (Light Green Front Pattern)
+            const logoGeo = new THREE.PlaneGeometry(0.32, 0.32);
             const logoMat = new THREE.MeshBasicMaterial({ color: 0x81c784, side: THREE.DoubleSide });
             const logo = new THREE.Mesh(logoGeo, logoMat);
             logo.position.set(0, 1.0, 0.28);
@@ -410,20 +476,20 @@
             headMesh.castShadow = true;
             playerMesh.add(headMesh);
 
-            // Hair (Short dark hair)
+            // Hair
             const hairGeo = new THREE.ConeGeometry(0.24, 0.18, 8);
             const hairMat = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
             const hair = new THREE.Mesh(hairGeo, hairMat);
             hair.position.set(0, 1.62, -0.02);
             playerMesh.add(hair);
 
-            // Face (Nose / Ears representation)
+            // Nose
             const noseGeo = new THREE.BoxGeometry(0.04, 0.08, 0.06);
             const nose = new THREE.Mesh(noseGeo, skinMat);
             nose.position.set(0, 1.5, 0.22);
             playerMesh.add(nose);
 
-            // Shorts (Black Shorts)
+            // Black Shorts
             const shortsGeo = new THREE.CylinderGeometry(0.3, 0.32, 0.35, 8);
             const shortsMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
             const shorts = new THREE.Mesh(shortsGeo, shortsMat);
@@ -544,10 +610,8 @@
             }
         }
 
-        // Pine Tree Mesh Generator
         function createPineTree() {
             const treeGroup = new THREE.Group();
-
             const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.8, 6);
             const trunkMat = new THREE.MeshLambertMaterial({ color: 0x4e3629 });
             const trunk = new THREE.Mesh(trunkGeo, trunkMat);
@@ -555,7 +619,6 @@
             trunk.castShadow = true;
             treeGroup.add(trunk);
 
-            // Foliage Tiers
             for (let i = 0; i < 3; i++) {
                 const foliageGeo = new THREE.ConeGeometry(1.6 - (i * 0.3), 1.8, 7);
                 const foliageMat = new THREE.MeshLambertMaterial({ color: 0x1b431e });
@@ -564,14 +627,11 @@
                 foliage.castShadow = true;
                 treeGroup.add(foliage);
             }
-
             return treeGroup;
         }
 
-        // Hue Monument Stele "HỌC VIỆN PHẬT GIÁO VIỆT NAM TẠI HUẾ"
         function createHueStele() {
             const steleGroup = new THREE.Group();
-
             const baseGeo = new THREE.BoxGeometry(1.8, 0.4, 1.2);
             const stoneMat = new THREE.MeshLambertMaterial({ color: 0xb5b0a3 });
             const base = new THREE.Mesh(baseGeo, stoneMat);
@@ -583,17 +643,14 @@
             tablet.position.y = 1.6;
             tablet.castShadow = true;
             steleGroup.add(tablet);
-
             return steleGroup;
         }
 
-        // Pagoda Gate Architecture
         function createPagodaGate() {
             const gateGroup = new THREE.Group();
             const pillarMat = new THREE.MeshLambertMaterial({ color: 0x8d6e63 });
             const roofMat = new THREE.MeshLambertMaterial({ color: 0x90231b });
 
-            // Pillars
             for (let x of [-0.8, 0.8]) {
                 const pillarGeo = new THREE.BoxGeometry(0.3, 2.5, 0.3);
                 const pillar = new THREE.Mesh(pillarGeo, pillarMat);
@@ -602,17 +659,14 @@
                 gateGroup.add(pillar);
             }
 
-            // Curved Roof Top
             const roofGeo = new THREE.ConeGeometry(1.6, 0.8, 4);
             const roof = new THREE.Mesh(roofGeo, roofMat);
             roof.position.y = 2.8;
             roof.rotation.y = Math.PI / 4;
             gateGroup.add(roof);
-
             return gateGroup;
         }
 
-        // Spawn Obstacles & Collectibles
         function spawnObstaclesAndCoins(zPos) {
             const laneIndex = Math.floor(Math.random() * 3);
             const obstacleType = Math.random();
@@ -629,7 +683,7 @@
                 scene.add(log);
                 obstacles.push({ mesh: log, lane: laneIndex, z: zPos - 7.5, type: 'JUMP', hit: false });
             } else {
-                // Overhead Wooden Beam (Slide under)
+                // Overhead Beam (Slide under)
                 const archGroup = new THREE.Group();
                 const beamGeo = new THREE.BoxGeometry(2.2, 0.3, 0.3);
                 const beamMat = new THREE.MeshLambertMaterial({ color: 0x3e2723 });
@@ -642,7 +696,7 @@
                 obstacles.push({ mesh: archGroup, lane: laneIndex, z: zPos - 7.5, type: 'SLIDE', hit: false });
             }
 
-            // Spawn Golden Leaf Tokens in other lanes
+            // Spawn Golden Leaf Tokens
             const coinLane = (laneIndex + 1) % 3;
             for (let c = 0; c < 3; c++) {
                 const coinGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.08, 12);
@@ -657,14 +711,13 @@
             }
         }
 
-        // Window Resize Event
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // Controls Logic
+        // Refined Control Handler
         function handleInput(action) {
             if (gameState !== 'PLAYING') return;
 
@@ -685,7 +738,6 @@
             }
         }
 
-        // Keyboard Event Listener
         window.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') handleInput('LEFT');
             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') handleInput('RIGHT');
@@ -693,13 +745,11 @@
             if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') handleInput('SLIDE');
         });
 
-        // Mobile Button Touch Listeners
         document.getElementById('btn-left').addEventListener('click', () => handleInput('LEFT'));
         document.getElementById('btn-right').addEventListener('click', () => handleInput('RIGHT'));
         document.getElementById('btn-jump').addEventListener('click', () => handleInput('JUMP'));
         document.getElementById('btn-slide').addEventListener('click', () => handleInput('SLIDE'));
 
-        // Touch Swipe Handling
         let touchStartX = 0;
         let touchStartY = 0;
 
@@ -714,27 +764,47 @@
             const diffY = e.changedTouches[0].clientY - touchStartY;
 
             if (Math.abs(diffX) > Math.abs(diffY)) {
-                if (diffX > 30) handleInput('RIGHT');
-                else if (diffX < -30) handleInput('LEFT');
+                if (diffX > 25) handleInput('RIGHT');
+                else if (diffX < -25) handleInput('LEFT');
             } else {
-                if (diffY < -30) handleInput('JUMP');
-                else if (diffY > 30) handleInput('SLIDE');
+                if (diffY < -25) handleInput('JUMP');
+                else if (diffY > 25) handleInput('SLIDE');
             }
         }, { passive: true });
 
-        // Update Game Loop
+        // Main Animation & Update Loop
         function update() {
             if (gameState !== 'PLAYING') return;
 
-            // Increase Game Speed over time
-            gameSpeed = Math.min(RUN_SPEED_MAX, gameSpeed + 0.00005);
-            score += Math.round(gameSpeed * 10);
+            // Speed Acceleration
+            gameSpeed = Math.min(RUN_SPEED_MAX, gameSpeed + 0.00004);
+
+            // Distance calculation
+            const frameMeters = gameSpeed * 12;
+            distanceMeters += frameMeters;
+            score += Math.round(frameMeters * 5);
+
+            // Update 6KM Race Progress Bar & UI Text
+            const currentKm = (distanceMeters / 1000).toFixed(2);
+            const progressPercent = Math.min(100, (distanceMeters / TARGET_DISTANCE_METERS) * 100);
+
+            document.getElementById('distance-text').textContent = currentKm;
             document.getElementById('score-text').textContent = score.toLocaleString();
+            document.getElementById('race-progress-bar').style.width = progressPercent + '%';
+            document.getElementById('progress-runner-icon').style.left = `calc(${progressPercent}% - 6px)`;
 
-            // Lane Transition Smooth Animation
-            playerGroup.position.x += (targetX - playerGroup.position.x) * 0.2;
+            // Check Victory Condition (6KM = 6000m)
+            if (distanceMeters >= TARGET_DISTANCE_METERS) {
+                triggerVictory();
+                return;
+            }
 
-            // Handle Jumping
+            // Smooth Lane Transition + Subtle Body Roll Tilt
+            const diffX = targetX - playerGroup.position.x;
+            playerGroup.position.x += diffX * 0.28;
+            playerMesh.rotation.z = -diffX * 0.15; // Body Tilt when moving laterally
+
+            // Jump Physics
             if (isJumping) {
                 playerY += jumpVelocity;
                 jumpVelocity -= GRAVITY;
@@ -744,10 +814,10 @@
                 }
             }
 
-            // Handle Sliding
+            // Slide Crouch Action
             if (isSliding) {
                 slideTimer--;
-                playerMesh.scale.set(1, 0.5, 1);
+                playerMesh.scale.set(1, 0.45, 1);
                 if (slideTimer <= 0) {
                     isSliding = false;
                     playerMesh.scale.set(1, 1, 1);
@@ -758,27 +828,27 @@
 
             playerGroup.position.y = playerY;
 
-            // Running Animation (Legs & Arms swinging)
-            const time = Date.now() * 0.012 * (gameSpeed / RUN_SPEED_INITIAL);
+            // Leg and Arm Running Motion
+            const time = Date.now() * 0.014 * (gameSpeed / RUN_SPEED_INITIAL);
             if (!isJumping && !isSliding) {
-                leftLeg.rotation.x = Math.sin(time) * 0.7;
-                rightLeg.rotation.x = -Math.sin(time) * 0.7;
-                leftArm.rotation.x = -Math.sin(time) * 0.7;
-                rightArm.rotation.x = Math.sin(time) * 0.7;
+                leftLeg.rotation.x = Math.sin(time) * 0.75;
+                rightLeg.rotation.x = -Math.sin(time) * 0.75;
+                leftArm.rotation.x = -Math.sin(time) * 0.75;
+                rightArm.rotation.x = Math.sin(time) * 0.75;
             } else if (isJumping) {
-                leftLeg.rotation.x = -0.5;
-                rightLeg.rotation.x = 0.5;
+                leftLeg.rotation.x = -0.6;
+                rightLeg.rotation.x = 0.6;
             }
 
-            // Camera Tracking
-            camera.position.x = playerGroup.position.x * 0.3;
+            // Dynamic Camera Tracking
+            camera.position.x += (playerGroup.position.x * 0.35 - camera.position.x) * 0.1;
 
             // Move Track Segments
             trackSegments.forEach((segment) => {
                 segment.group.position.z += gameSpeed * 15;
             });
 
-            // Recalculate Infinite Loop for Track Tiles
+            // Loop Track Segment Creation
             const firstTile = trackSegments[0];
             if (firstTile.group.position.z > 15) {
                 scene.remove(firstTile.group);
@@ -788,12 +858,11 @@
                 spawnTrackTile(newZ);
             }
 
-            // Move & Check Collisions: Obstacles
+            // Check Collisions: Obstacles
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 const obs = obstacles[i];
                 obs.mesh.position.z += gameSpeed * 15;
 
-                // Collision Detection with Player
                 if (!obs.hit && Math.abs(obs.mesh.position.z - playerGroup.position.z) < 0.8) {
                     if (obs.lane === currentLane) {
                         if (obs.type === 'JUMP' && playerY < 0.6) {
@@ -804,14 +873,13 @@
                     }
                 }
 
-                // Cleanup passed obstacles
                 if (obs.mesh.position.z > 10) {
                     scene.remove(obs.mesh);
                     obstacles.splice(i, 1);
                 }
             }
 
-            // Move & Collect Items: Golden Leaf Tokens
+            // Collectibles: Golden Leaf Tokens
             for (let i = collectibles.length - 1; i >= 0; i--) {
                 const coin = collectibles[i];
                 coin.mesh.position.z += gameSpeed * 15;
@@ -821,8 +889,8 @@
                     if (coin.lane === currentLane && Math.abs(playerY - 0.8) < 1.0) {
                         coin.collected = true;
                         scene.remove(coin.mesh);
-                        score += 150;
-                        energy = Math.min(100, energy + 5);
+                        score += 200;
+                        energy = Math.min(100, energy + 6);
                         document.getElementById('energy-bar').style.width = energy + '%';
                         document.getElementById('energy-text').textContent = Math.round(energy) + '%';
                         playSound('coin');
@@ -837,8 +905,8 @@
                 }
             }
 
-            // Slowly deplete Leaf Energy
-            energy = Math.max(0, energy - 0.02);
+            // Energy Drain Rate
+            energy = Math.max(0, energy - 0.025);
             document.getElementById('energy-bar').style.width = energy + '%';
             document.getElementById('energy-text').textContent = Math.round(energy) + '%';
 
@@ -847,17 +915,21 @@
             }
         }
 
-        // Render Loop
         function animate() {
             animFrameId = requestAnimationFrame(animate);
             update();
             renderer.render(scene, camera);
         }
 
-        // Start Game
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
         function startGame() {
-            // Reset variables
             score = 0;
+            distanceMeters = 0;
             energy = 100;
             gameSpeed = RUN_SPEED_INITIAL;
             currentLane = 1;
@@ -866,45 +938,97 @@
             playerY = 0;
             isJumping = false;
             isSliding = false;
+            startTime = Date.now();
 
-            // Clear obstacles and collectibles
             obstacles.forEach(o => scene.remove(o.mesh));
             collectibles.forEach(c => scene.remove(c.mesh));
             obstacles.length = 0;
             collectibles.length = 0;
 
             document.getElementById('overlay-screen').classList.add('hidden');
+            document.getElementById('victory-medal-container').classList.add('hidden');
+            document.getElementById('controls-guide').classList.remove('hidden');
+
             gameState = 'PLAYING';
             playSound('jump');
         }
 
-        // Trigger Game Over
-        function triggerGameOver() {
-            gameState = 'GAMEOVER';
-            playSound('hit');
+        // 6KM Victory Sequence Trigger
+        function triggerVictory() {
+            gameState = 'VICTORY';
+            elapsedTime = (Date.now() - startTime) / 1000;
+            playSound('win');
 
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('thienthai_high_score', highScore);
+            if (distanceMeters > highScoreDistance) {
+                highScoreDistance = distanceMeters;
+                localStorage.setItem('thienthai_high_dist', highScoreDistance);
             }
 
-            document.getElementById('user-high-score').textContent = Number(highScore).toLocaleString();
-            document.getElementById('best-score').textContent = Number(highScore).toLocaleString();
+            const bestKm = (highScoreDistance / 1000).toFixed(2);
+            document.getElementById('user-high-score').textContent = bestKm + ' km';
+            document.getElementById('best-score').textContent = bestKm + ' km';
+
+            document.getElementById('final-distance').textContent = '6.00 km';
+            document.getElementById('final-time').textContent = formatTime(elapsedTime);
             document.getElementById('final-score').textContent = score.toLocaleString();
 
-            document.getElementById('overlay-title').textContent = 'GAME OVER';
-            document.getElementById('overlay-subtitle').textContent = 'Bạn đã va phải chướng ngại vật trên đường chạy!';
+            document.getElementById('race-tag').textContent = 'XÁC NHẬN HOÀN THÀNH ĐƯỜNG ĐUA!';
+            document.getElementById('overlay-title').textContent = 'HOÀN THÀNH 6KM!';
+            document.getElementById('overlay-subtitle').textContent = 'Chúc mừng bạn đã chinh phục cung đường Rừng Thông An Cựu!';
+            
+            document.getElementById('victory-medal-container').classList.remove('hidden');
             document.getElementById('score-summary').classList.remove('hidden');
+            document.getElementById('controls-guide').classList.add('hidden');
+
+            document.getElementById('btn-start-text').textContent = 'CHẠY LẠI CUNG ĐƯỜNG 6KM';
+            document.getElementById('overlay-screen').classList.remove('hidden');
+
+            // Trigger Victory Confetti
+            if (window.confetti) {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#4ade80', '#fbbf24', '#34d399', '#f59e0b']
+                });
+            }
+        }
+
+        function triggerGameOver() {
+            gameState = 'GAMEOVER';
+            elapsedTime = (Date.now() - startTime) / 1000;
+            playSound('hit');
+
+            if (distanceMeters > highScoreDistance) {
+                highScoreDistance = distanceMeters;
+                localStorage.setItem('thienthai_high_dist', highScoreDistance);
+            }
+
+            const currentKm = (distanceMeters / 1000).toFixed(2);
+            const bestKm = (highScoreDistance / 1000).toFixed(2);
+
+            document.getElementById('user-high-score').textContent = bestKm + ' km';
+            document.getElementById('best-score').textContent = bestKm + ' km';
+            document.getElementById('final-distance').textContent = currentKm + ' km';
+            document.getElementById('final-time').textContent = formatTime(elapsedTime);
+            document.getElementById('final-score').textContent = score.toLocaleString();
+
+            document.getElementById('race-tag').textContent = 'CHƯA HOÀN THÀNH 6KM';
+            document.getElementById('overlay-title').textContent = 'GAME OVER';
+            document.getElementById('overlay-subtitle').textContent = 'Bạn đã va phải cản gỗ trên đường hoặc kiệt sức!';
+            
+            document.getElementById('victory-medal-container').classList.add('hidden');
+            document.getElementById('score-summary').classList.remove('hidden');
+            document.getElementById('controls-guide').classList.remove('hidden');
+
             document.getElementById('btn-start-text').textContent = 'CHẠY LẠI';
             document.getElementById('overlay-screen').classList.remove('hidden');
         }
 
-        // Start Button Click Event
         document.getElementById('btn-start').addEventListener('click', () => {
             startGame();
         });
 
-        // Initialize Scene on Window Load
         window.onload = () => {
             initScene();
             animate();

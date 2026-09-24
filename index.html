@@ -8,8 +8,8 @@
         body {
             margin: 0;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #111;
             user-select: none;
         }
         #canvas-container {
@@ -45,7 +45,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -72,6 +72,7 @@
         }
         .hidden { display: none !important; }
     </style>
+    <!-- Nhúng thư viện Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -87,27 +88,29 @@
         </div>
     </div>
 
+    <!-- Màn hình Bắt đầu -->
     <div id="start-screen" class="overlay">
         <h1 style="color: #4CAF50; font-size: 42px; margin-bottom: 10px;">THIÊN THAI RUN 🏃‍♂️</h1>
         <p style="font-size: 18px; max-width: 500px; line-height: 1.5;">
-            Trải nghiệm chạy vô tận xuyên rừng thông An Cựu. Né chướng ngại vật và lập kỷ lục quãng đường xa nhất!
+            Trải nghiệm chạy vô tận xuyên rừng thông An Cựu[cite: 2]! Né chướng ngại vật và ghi điểm cao nhất.
         </p>
         <p style="font-size: 15px; color: #aaa;">
-            🎮 <b>Mũi tên Trái/Phải</b> hoặc <b>Vuốt màn hình</b> để đổi làn.<br>
-            🎮 <b>Mũi tên Lên / Space</b> để Nhảy.
+            🎮 <b>Phím Mũi tên Trái / Phải</b> để chuyển làn.<br>
+            🎮 <b>Mũi tên Lên / Phím Space</b> để Nhảy.
         </p>
         <button class="btn" onclick="startGame()">BẮT ĐẦU CHẠY</button>
     </div>
 
+    <!-- Màn hình Game Over -->
     <div id="gameover-screen" class="overlay hidden">
         <h1 style="color: #f44336; font-size: 40px;">KẾT THÚC HÀNH TRÌNH! 💥</h1>
-        <p style="font-size: 22px;">Quãng đường đạt được: <b style="color:#4CAF50"><span id="final-dist">0</span> KM</b></p>
+        <p style="font-size: 22px;">Quãng đường đã chạy: <b style="color:#4CAF50"><span id="final-dist">0</span> KM</b></p>
         <p style="font-size: 20px;">Điểm thu thập: <b style="color:#FFD700"><span id="final-score">0</span></b></p>
         <button class="btn" onclick="resetGame()">CHẠY LẠI</button>
     </div>
 
     <script>
-        const GAME_SPEED = 0.5;
+        const GAME_SPEED = 0.4;
         const LANES = [-2.5, 0, 2.5];
 
         let scene, camera, renderer;
@@ -129,20 +132,24 @@
         function init3D() {
             const container = document.getElementById('canvas-container');
             
+            // Khởi tạo Scene
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x87CEEB);
             scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
 
+            // Khởi tạo Camera
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 3.5, -6);
             camera.lookAt(0, 1.5, 5);
 
+            // Khởi tạo Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             container.appendChild(renderer.domElement);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            // Ánh sáng
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
 
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -150,6 +157,7 @@
             dirLight.castShadow = true;
             scene.add(dirLight);
 
+            // Tạo nhân vật & môi trường
             createAnimatedPlayer();
             createRoad();
 
@@ -157,11 +165,13 @@
             setupControls();
         }
 
-        // Tạo nhân vật có khớp tay chân để cử động
+        // Tạo nhân vật có khả năng cử động chân tay
         function createAnimatedPlayer() {
             playerGroup = new THREE.Group();
 
-            // Áo Thiên Thai Run (Phối xanh lá nõn chuối & xanh đậm)
+            const skinMat = new THREE.MeshLambertMaterial({ color: 0xffdbac });
+
+            // Thân áo Thiên Thai Run (Màu xanh lá)
             const torsoGeo = new THREE.BoxGeometry(0.6, 0.8, 0.35);
             const torsoMat = new THREE.MeshLambertMaterial({ color: 0x4caf50 });
             const torso = new THREE.Mesh(torsoGeo, torsoMat);
@@ -169,50 +179,40 @@
             torso.castShadow = true;
             playerGroup.add(torso);
 
-            // In họa tiết chữ/logo giả lập trên áo
-            const logoGeo = new THREE.PlaneGeometry(0.35, 0.25);
-            const logoMat = new THREE.MeshBasicMaterial({ color: 0x1b5e20, side: THREE.DoubleSide });
-            const logo = new THREE.Mesh(logoGeo, logoMat);
-            logo.position.set(0, 1.15, 0.18);
-            playerGroup.add(logo);
-
             // Đầu
             const headGeo = new THREE.SphereGeometry(0.22, 16, 16);
-            const skinMat = new THREE.MeshLambertMaterial({ color: 0xffdbac });
             const head = new THREE.Mesh(headGeo, skinMat);
             head.position.y = 1.7;
             playerGroup.add(head);
 
-            // Quần đùi đen
+            // Quần đùi
             const shortsGeo = new THREE.BoxGeometry(0.62, 0.3, 0.37);
             const shortsMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
             const shorts = new THREE.Mesh(shortsGeo, shortsMat);
             shorts.position.y = 0.65;
             playerGroup.add(shorts);
 
-            // Tay Trái
+            // Khớp Tay Trái
             const armGeo = new THREE.BoxGeometry(0.15, 0.6, 0.15);
             leftArm = new THREE.Mesh(armGeo, skinMat);
             leftArm.position.set(-0.4, 1.1, 0);
             leftArm.geometry.translate(0, -0.25, 0);
             playerGroup.add(leftArm);
 
-            // Tay Phải
+            // Khớp Tay Phải
             rightArm = new THREE.Mesh(armGeo, skinMat);
             rightArm.position.set(0.4, 1.1, 0);
             rightArm.geometry.translate(0, -0.25, 0);
             playerGroup.add(rightArm);
 
-            // Chân Trái
+            // Khớp Chân Trái
             const legGeo = new THREE.BoxGeometry(0.18, 0.6, 0.18);
-            const shoeMat = new THREE.MeshLambertMaterial({ color: 0x212121 });
-            
             leftLeg = new THREE.Mesh(legGeo, skinMat);
             leftLeg.position.set(-0.18, 0.5, 0);
             leftLeg.geometry.translate(0, -0.25, 0);
             playerGroup.add(leftLeg);
 
-            // Chân Phải
+            // Khớp Chân Phải
             rightLeg = new THREE.Mesh(legGeo, skinMat);
             rightLeg.position.set(0.18, 0.5, 0);
             rightLeg.geometry.translate(0, -0.25, 0);
@@ -231,6 +231,7 @@
         function spawnRoadTile(zPos) {
             const tileGroup = new THREE.Group();
 
+            // Mặt đường
             const roadGeo = new THREE.PlaneGeometry(9, 20);
             const roadMat = new THREE.MeshLambertMaterial({ color: 0x4e4e4e });
             const road = new THREE.Mesh(roadGeo, roadMat);
@@ -238,7 +239,7 @@
             road.receiveShadow = true;
             tileGroup.add(road);
 
-            // Kẻ làn
+            // Vạch kẻ đường
             for (let l of [-1.25, 1.25]) {
                 const lineGeo = new THREE.PlaneGeometry(0.1, 20);
                 const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -249,7 +250,7 @@
                 tileGroup.add(line);
             }
 
-            // Đồi cỏ & Cây thông 2 bên đường
+            // Đồi cỏ 2 bên
             const grassGeo = new THREE.PlaneGeometry(20, 20);
             const grassMat = new THREE.MeshLambertMaterial({ color: 0x2e7d32 });
 
@@ -263,6 +264,7 @@
             rightGrass.position.x = 14.5;
             tileGroup.add(rightGrass);
 
+            // Cây thông Rừng An Cựu
             for (let i = -8; i <= 8; i += 4) {
                 spawnTree(tileGroup, -7 - Math.random() * 3, i);
                 spawnTree(tileGroup, 7 + Math.random() * 3, i);
@@ -290,3 +292,179 @@
             tree.position.set(x, 0, z);
             parent.add(tree);
         }
+
+        function spawnObstacle(zPos) {
+            const laneIndex = Math.floor(Math.random() * 3);
+            const x = LANES[laneIndex];
+
+            const geo = new THREE.BoxGeometry(1.8, 0.9, 0.6);
+            const mat = new THREE.MeshLambertMaterial({ color: 0xc62828 });
+            const obs = new THREE.Mesh(geo, mat);
+            obs.position.set(x, 0.45, zPos);
+            obs.castShadow = true;
+
+            scene.add(obs);
+            obstacles.push(obs);
+        }
+
+        function spawnCollectible(zPos) {
+            const laneIndex = Math.floor(Math.random() * 3);
+            const x = LANES[laneIndex];
+
+            const geo = new THREE.OctahedronGeometry(0.35);
+            const mat = new THREE.MeshBasicMaterial({ color: 0x76ff03 });
+            const item = new THREE.Mesh(geo, mat);
+            item.position.set(x, 1.1, zPos);
+
+            scene.add(item);
+            collectibles.push(item);
+        }
+
+        function setupControls() {
+            document.addEventListener('keydown', (e) => {
+                if (!isGameRunning) return;
+
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                    if (currentLane > 0) currentLane--;
+                } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                    if (currentLane < 2) currentLane++;
+                } else if ((e.key === 'ArrowUp' || e.key === ' ') && !isJumping) {
+                    isJumping = true;
+                    jumpVelocity = 0.28;
+                }
+            });
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            isGameRunning = true;
+        }
+
+        function resetGame() {
+            obstacles.forEach(o => scene.remove(o));
+            collectibles.forEach(c => scene.remove(c));
+            obstacles = [];
+            collectibles = [];
+
+            distanceCovered = 0;
+            score = 0;
+            currentLane = 1;
+            playerGroup.position.set(LANES[1], 0, 0);
+
+            document.getElementById('score-text').innerText = '0';
+            document.getElementById('dist-text').innerText = '0.00';
+
+            document.getElementById('gameover-screen').classList.add('hidden');
+            isGameRunning = true;
+        }
+
+        function gameOver() {
+            isGameRunning = false;
+            const distKM = (distanceCovered / 1000).toFixed(2);
+            document.getElementById('final-dist').innerText = distKM;
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('gameover-screen').classList.remove('hidden');
+        }
+
+        function update() {
+            if (!isGameRunning) return;
+
+            // Tính toán quãng đường (KM)
+            distanceCovered += GAME_SPEED * 0.8;
+            const currentKM = (distanceCovered / 1000).toFixed(2);
+            document.getElementById('dist-text').innerText = currentKM;
+
+            // Chuyển làn mượt
+            playerGroup.position.x += (LANES[currentLane] - playerGroup.position.x) * 0.2;
+
+            // Cử động Tay - Chân khi chạy
+            animTime += 0.2;
+            if (!isJumping) {
+                leftArm.rotation.x = Math.sin(animTime) * 0.7;
+                rightArm.rotation.x = -Math.sin(animTime) * 0.7;
+                leftLeg.rotation.x = -Math.sin(animTime) * 0.8;
+                rightLeg.rotation.x = Math.sin(animTime) * 0.8;
+            } else {
+                leftArm.rotation.x = -1;
+                rightArm.rotation.x = -1;
+                leftLeg.rotation.x = 0.5;
+                rightLeg.rotation.x = -0.5;
+            }
+
+            // Xử lý Nhảy
+            if (isJumping) {
+                playerGroup.position.y += jumpVelocity;
+                jumpVelocity -= gravity;
+                if (playerGroup.position.y <= 0) {
+                    playerGroup.position.y = 0;
+                    isJumping = false;
+                }
+            }
+
+            // Di chuyển đường
+            roadTiles.forEach(tile => {
+                tile.position.z -= GAME_SPEED;
+                if (tile.position.z < -20) {
+                    tile.position.z += 240;
+                }
+            });
+
+            // Sinh chướng ngại vật & vật phẩm ngẫu nhiên
+            if (Math.random() < 0.03) spawnObstacle(playerGroup.position.z + 90);
+            if (Math.random() < 0.04) spawnCollectible(playerGroup.position.z + 90);
+
+            // Xử lý Chướng ngại vật
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obs = obstacles[i];
+                obs.position.z -= GAME_SPEED;
+
+                // Va chạm
+                if (Math.abs(obs.position.z - playerGroup.position.z) < 0.6 &&
+                    Math.abs(obs.position.x - playerGroup.position.x) < 0.8 &&
+                    playerGroup.position.y < 0.8) {
+                    gameOver();
+                }
+
+                if (obs.position.z < -10) {
+                    scene.remove(obs);
+                    obstacles.splice(i, 1);
+                }
+            }
+
+            // Xử lý Vật phẩm
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                let item = collectibles[i];
+                item.position.z -= GAME_SPEED;
+                item.rotation.y += 0.05;
+
+                if (Math.abs(item.position.z - playerGroup.position.z) < 0.7 &&
+                    Math.abs(item.position.x - playerGroup.position.x) < 0.7) {
+                    score += 10;
+                    document.getElementById('score-text').innerText = score;
+                    scene.remove(item);
+                    collectibles.splice(i, 1);
+                } else if (item.position.z < -10) {
+                    scene.remove(item);
+                    collectibles.splice(i, 1);
+                }
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            update();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Chạy game
+        init3D();
+        animate();
+    </script>
+</body>
+</html>
